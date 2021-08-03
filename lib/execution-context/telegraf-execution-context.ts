@@ -1,13 +1,12 @@
 import { ContextType, ExecutionContext } from '@nestjs/common';
 import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
-import { TgArgumentsHost } from './tg-arguments-host.interface';
+import { TgArgumentsHost } from './tg-arguments-host.interace';
 
 export type TelegrafContextType = 'telegraf' | ContextType;
 
 export class TelegrafExecutionContext
   extends ExecutionContextHost
-  implements TgArgumentsHost
-{
+  implements TgArgumentsHost {
   static create(context: ExecutionContext): TelegrafExecutionContext {
     const type = context.getType();
     const tgContext = new TelegrafExecutionContext(
@@ -28,6 +27,6 @@ export class TelegrafExecutionContext
   }
 
   getNext<T = any>(): T {
-    return this.getArgByIndex(1);
+    return this.getArgByIndex(0);
   }
 }

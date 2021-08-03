@@ -48,11 +48,9 @@ export class ListenersExplorerService
     this.bot = this.moduleRef.get<Telegraf<any>>(this.botName, {
       strict: false,
     });
-    this.explore();
-
     this.bot.use(this.stage.middleware());
 
-    this.exploreUpdates();
+    this.explore();
   }
 
   explore(): void {
@@ -61,28 +59,8 @@ export class ListenersExplorerService
       this.telegrafOptions.include || [],
     );
 
-    this.registerComposers(modules);
-    this.registerScenes(modules);
-  }
-
-  exploreUpdates(): void {
-    const modules = this.getModules(
-      this.modulesContainer,
-      this.telegrafOptions.include || [],
-    );
-
     this.registerUpdates(modules);
-  }
-
-  private registerComposers(modules: Module[]): void {
-    const updates = this.flatMap<InstanceWrapper>(modules, (instance) =>
-      this.filterComposers(instance),
-    );
-    updates.forEach((wrapper) => {
-      const composer = new Composer();
-      this.registerListeners(composer, wrapper);
-      this.stage.use(composer);
-    });
+    this.registerScenes(modules);
   }
 
   private registerUpdates(modules: Module[]): void {
@@ -96,16 +74,10 @@ export class ListenersExplorerService
     const scenes = this.flatMap<InstanceWrapper>(modules, (wrapper) =>
       this.filterScenes(wrapper),
     );
-    const sceneIds = [];
     scenes.forEach((wrapper) => {
       const { sceneId, type, options } = this.metadataAccessor.getSceneMetadata(
         wrapper.instance.constructor,
       );
-      if (sceneIds.includes(sceneId)) {
-        throw new Error(`Two scenes with the same id ${sceneId} were detected`);
-      }
-      sceneIds.push(sceneId);
-
       const scene =
         type === 'base'
           ? new Scenes.BaseScene<any>(sceneId, options || ({} as any))
@@ -118,16 +90,6 @@ export class ListenersExplorerService
         this.registerWizardListeners(scene as Scenes.WizardScene<any>, wrapper);
       }
     });
-  }
-
-  private filterComposers(wrapper: InstanceWrapper): InstanceWrapper<unknown> {
-    const { instance } = wrapper;
-    if (!instance) return undefined;
-
-    const isComposer = this.metadataAccessor.isComposer(wrapper.metatype);
-    if (!isComposer) return undefined;
-
-    return wrapper;
   }
 
   private filterUpdates(wrapper: InstanceWrapper): InstanceWrapper<unknown> {
@@ -200,7 +162,7 @@ export class ListenersExplorerService
         {},
       );
 
-    wizard.steps = Object.values(group).map((stepsMetadata) => {
+    const steps = Object.values(group).map((stepsMetadata) => {
       const composer = new Composer();
       stepsMetadata.forEach((stepMethod) => {
         this.registerIfListener(
@@ -213,6 +175,8 @@ export class ListenersExplorerService
       });
       return composer.middleware();
     });
+
+    wizard.steps = steps;
   }
 
   private registerIfListener(
@@ -223,8 +187,7 @@ export class ListenersExplorerService
     defaultMetadata?: ListenerMetadata[],
   ): void {
     const methodRef = prototype[methodName];
-    const metadata =
-      this.metadataAccessor.getListenerMetadata(methodRef) || defaultMetadata;
+    const metadata = this.metadataAccessor.getListenerMetadata(methodRef) || defaultMetadata;
     if (!metadata || metadata.length < 1) {
       return undefined;
     }
@@ -259,7 +222,7 @@ export class ListenersExplorerService
     methodName: string,
   ) {
     const paramsFactory = this.telegrafParamsFactory;
-    return this.externalContextCreator.create<
+    const resolverCallback = this.externalContextCreator.create<
       Record<number, ParamMetadata>,
       TelegrafContextType
     >(
@@ -273,5 +236,6 @@ export class ListenersExplorerService
       undefined,
       'telegraf',
     );
+    return resolverCallback;
   }
 }

@@ -1,4 +1,4 @@
-# NestJS Telegraf ![npm](https://img.shields.io/npm/dm/nestjs-telegraf) ![GitHub last commit](https://img.shields.io/github/last-commit/bukhalo/nestjs-telegraf) ![NPM](https://img.shields.io/npm/l/nestjs-telegraf)
+# NestJS Telegraf ![npm](https://img.shields.io/npm/dm/@xtcry/nestjs-telegraf) ![GitHub last commit](https://img.shields.io/github/last-commit/xtcry/nestjs-telegraf) ![NPM](https://img.shields.io/npm/l/@xtcry/nestjs-telegraf)
 
 <img align="right" width="95" height="148" title="NestJS logotype"
      src="https://nestjs.com/img/logo-small.svg">
@@ -17,18 +17,67 @@ This package uses the best of the NodeJS world under the hood. [Telegraf](https:
 - Ability to run multiple bots simultaneously.
 - Full support of NestJS guards, interceptors, filters and pipes!
 
-**User stories**
-- [Новогодняя история одного телеграм-бота на NestJS](https://habr.com/ru/company/tinkoff/blog/596287/) by [Tinkoff Bank](https://github.com/Tinkoff)
-- [The story of the creation of the personal telegram bot (40 articles!)](https://dev.to/endykaufman/i-decided-to-try-to-keep-a-twitter-history-of-rewriting-one-of-the-projects-im-starting--1e6p) by [@EndyKaufman](https://github.com/EndyKaufman)
+## Documentation
+If you want to dive fully into NestJS Telegraf then don't waste your time in this dump, check out the [documentation site](https://nestjs-telegraf.vercel.app).
 
-**Chat**
-
-* [Telegram](https://t.me/nestjs_telegraf)
 ## Installation
 
 ```bash
-$ npm i nestjs-telegraf telegraf
+$ npm i @xtcry/nestjs-telegraf telegraf
 ```
 
-## Documentation
-Check out the [documentation site](https://nestjs-telegraf.vercel.app).
+## Usage
+Once the installation process is complete, we can import the `TelegrafModule` into the root `AppModule`:
+```typescript
+import { Module } from '@nestjs/common';
+import { TelegrafModule } from '@xtcry/nestjs-telegraf';
+
+@Module({
+  imports: [
+    TelegrafModule.forRoot({
+      token: 'TELEGRAM_BOT_TOKEN',
+    })
+  ],
+})
+export class AppModule {}
+```
+
+Then create `app.update.ts` file and add some decorators for handling Telegram bot API updates:
+
+```typescript
+import {
+  Update,
+  Start,
+  Help,
+  On,
+  Hears,
+  Context,
+} from '@xtcry/nestjs-telegraf';
+import { AppService } from './app.service';
+import { Context } from './context.interface';
+
+@Update()
+export class AppUpdate {
+  constructor(private readonly appService: AppService)
+
+  @Start()
+  async startCommand(ctx: Context) {
+    await ctx.reply('Welcome');
+  }
+
+  @Help()
+  async helpCommand(ctx: Context) {
+    await ctx.reply('Send me a sticker');
+  }
+
+  @On('sticker')
+  async onSticker(ctx: Context) {
+    await ctx.reply('👍');
+  }
+
+  @Hears('hi')
+  async hearsHi(ctx: Context) {
+    await ctx.reply('Hey there');
+  }
+}
+```

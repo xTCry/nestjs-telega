@@ -1,11 +1,10 @@
 import { ArgumentsHost } from '@nestjs/common';
 import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
-import { TgArgumentsHost } from './tg-arguments-host.interface';
+import { TgArgumentsHost } from './tg-arguments-host.interace';
 
 export class TelegrafArgumentsHost
   extends ExecutionContextHost
-  implements TgArgumentsHost
-{
+  implements TgArgumentsHost {
   static create(context: ArgumentsHost): TelegrafArgumentsHost {
     const type = context.getType();
     const tgContext = new TelegrafArgumentsHost(context.getArgs());

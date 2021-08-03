@@ -19,10 +19,6 @@ import {
 } from './telegraf.constants';
 import { ListenersExplorerService, MetadataAccessorService } from './services';
 import { telegrafStageProvider } from './stage.provider';
-import {
-  allBotsMap,
-  telegrafAllBotsProvider,
-} from './telegraf-all-bots.provider';
 import { createBotFactory, getBotToken } from './utils';
 
 @Global()
@@ -47,11 +43,7 @@ export class TelegrafCoreModule implements OnApplicationShutdown {
 
     const telegrafBotProvider: Provider = {
       provide: telegrafBotName,
-      useFactory: async () => {
-        const bot = await createBotFactory(options);
-        allBotsMap.set(telegrafBotName, bot);
-        return bot;
-      },
+      useFactory: async () => await createBotFactory(options),
     };
 
     return {
@@ -64,13 +56,11 @@ export class TelegrafCoreModule implements OnApplicationShutdown {
         telegrafStageProvider,
         telegrafBotNameProvider,
         telegrafBotProvider,
-        telegrafAllBotsProvider,
       ],
       exports: [
         telegrafStageProvider,
         telegrafBotNameProvider,
         telegrafBotProvider,
-        telegrafAllBotsProvider,
       ],
     };
   }
@@ -87,11 +77,8 @@ export class TelegrafCoreModule implements OnApplicationShutdown {
 
     const telegrafBotProvider: Provider = {
       provide: telegrafBotName,
-      useFactory: async (options: TelegrafModuleOptions) => {
-        const bot = await createBotFactory(options);
-        allBotsMap.set(telegrafBotName, bot);
-        return bot;
-      },
+      useFactory: async (options: TelegrafModuleOptions) =>
+        await createBotFactory(options),
       inject: [TELEGRAF_MODULE_OPTIONS],
     };
 
@@ -104,13 +91,11 @@ export class TelegrafCoreModule implements OnApplicationShutdown {
         telegrafStageProvider,
         telegrafBotNameProvider,
         telegrafBotProvider,
-        telegrafAllBotsProvider,
       ],
       exports: [
         telegrafStageProvider,
         telegrafBotNameProvider,
         telegrafBotProvider,
-        telegrafAllBotsProvider,
       ],
     };
   }
