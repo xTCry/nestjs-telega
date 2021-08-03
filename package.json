@@ -1,6 +1,6 @@
 {
-  "name": "nestjs-telegraf",
-  "version": "2.7.0",
+  "name": "@xtcry/nestjs-telegraf",
+  "version": "2.2.4",
   "description": "Telegraf module for NestJS",
   "keywords": [
     "nest",
@@ -14,14 +14,19 @@
     "bot api",
     "bot framework"
   ],
-  "homepage": "https://nestjs-telegraf.vercel.app",
+  "homepage": "https://github.com/bukhalo/nestjs-telegraf#readme",
   "bugs": {
-    "url": "https://github.com/evilsprut/nestjs-telegraf/issues"
+    "url": "https://github.com/bukhalo/nestjs-telegraf/issues"
   },
-  "repository": "git@github.com:evilsprut/nestjs-telegraf.git",
-  "funding": "https://hypeer.company/donate",
+  "repository": "git@github.com:bukhalo/nestjs-telegraf.git",
+  "funding": [
+    {
+      "type": "individual",
+      "url": "https://www.tinkoff.ru/sl/95M2htqoxux"
+    }
+  ],
   "license": "MIT",
-  "author": "Aleksandr Bukhalo <evilsprut@icloud.com>",
+  "author": "Alexander Bukhalo <a@bukhalo.com>",
   "contributors": [
     {
       "name": "Arthur Asimov",
@@ -36,10 +41,7 @@
     "prepublish:npm": "npm run build",
     "publish:npm": "npm publish --access public",
     "test": "",
-    "typedoc:build": "typedoc --tsconfig ./tsconfig.typedoc.json",
-    "docs:dev": "vitepress dev",
-    "docs:build": "vitepress build",
-    "docs:preview": "vitepress preview"
+    "typedoc:build": "typedoc --tsconfig ./tsconfig.typedoc.json"
   },
   "husky": {
     "hooks": {
@@ -56,30 +58,30 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@commitlint/cli": "17.4.4",
-    "@commitlint/config-angular": "17.6.7",
-    "@nestjs/common": "^9.0.11",
-    "@nestjs/core": "^9.0.11",
-    "@types/lodash": "4.14.195",
-    "@typescript-eslint/eslint-plugin": "5.54.0",
-    "@typescript-eslint/parser": "5.62.0",
-    "eslint": "8.45.0",
-    "eslint-config-prettier": "8.8.0",
-    "eslint-plugin-prettier": "5.0.0",
-    "husky": "8.0.1",
-    "lint-staged": "13.2.3",
-    "prettier": "3.0.0",
+    "@commitlint/cli": "13.1.0",
+    "@commitlint/config-angular": "13.1.0",
+    "@nestjs/common": "7.6.18",
+    "@nestjs/core": "7.6.18",
+    "@types/lodash": "4.14.171",
+    "@typescript-eslint/eslint-plugin": "4.28.5",
+    "@typescript-eslint/parser": "4.28.5",
+    "eslint": "7.32.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-prettier": "3.4.0",
+    "husky": "7.0.1",
+    "lint-staged": "11.1.1",
+    "prettier": "2.3.2",
     "reflect-metadata": "0.1.13",
-    "telegraf": "4.12.2",
-    "typedoc": "0.24.8",
-    "typescript": "4.8.2",
-    "vitepress": "^1.0.0-beta.6"
+    "rxjs": "6.6.7",
+    "telegraf": "4.3.0",
+    "typedoc": "0.21.5",
+    "typescript": "4.3.5"
   },
   "peerDependencies": {
-    "@nestjs/common": "^9.0.0 || ^10.0.0",
-    "@nestjs/core": "^9.0.0 || ^10.0.0",
+    "@nestjs/common": "^6.7.0 || ^7.0.0",
+    "@nestjs/core": "^6.7.0 || ^7.0.0",
     "reflect-metadata": "^0.1.13",
     "telegraf": "^4.0.0",
-    "typescript": "^4.1.2 || ^5.0.0"
+    "typescript": "^4.1.2"
   }
 }
