@@ -1,10 +1,4 @@
----
-id: getting-updates
-title: Getting updates
-sidebar_label: Getting updates
-slug: getting-updates
----
-
+# Getting updates
 ## Long polling
 
 By default, the bot receives updates using long-polling and requires no additional action.
@@ -35,7 +29,7 @@ TelegrafModule.forRootAsync({
     launchOptions: {
       webhook: {
         domain: 'domain.tld',
-        hookPath: '/secret-path',
+        path: '/secret-path',
       }
     }
   }),
