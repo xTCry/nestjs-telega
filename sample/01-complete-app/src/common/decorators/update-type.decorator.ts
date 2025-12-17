@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { TelegrafExecutionContext } from 'nestjs-telegraf';
+import { TelegrafExecutionContext } from '@xtcry/nestjs-telegraf';
 
 export const UpdateType = createParamDecorator(
   (_, ctx: ExecutionContext) =>

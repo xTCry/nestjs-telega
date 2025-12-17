@@ -1,4 +1,12 @@
-import { Command, Ctx, Hears, Start, Update, Sender } from 'nestjs-telegraf';
+import {
+  Command,
+  Ctx,
+  Hears,
+  Start,
+  Update,
+  Sender,
+  On,
+} from '@xtcry/nestjs-telegraf';
 import { UpdateType as TelegrafUpdateType } from 'telegraf/typings/telegram-types';
 import { Context } from '../interfaces/context.interface';
 import { HELLO_SCENE_ID, WIZARD_SCENE_ID } from '../app.constants';
@@ -27,5 +35,10 @@ export class GreeterUpdate {
   @Command('wizard')
   async onWizardCommand(@Ctx() ctx: Context): Promise<void> {
     await ctx.scene.enter(WIZARD_SCENE_ID);
+  }
+
+  @On('message_reaction')
+  async onOn(@Ctx() ctx: Context) {
+    ctx.reply(`Reaction received: ${JSON.stringify(ctx.reactions.toArray())}`);
   }
 }

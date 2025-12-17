@@ -1,4 +1,4 @@
-import { Scene, SceneEnter, SceneLeave, Command } from 'nestjs-telegraf';
+import { Scene, SceneEnter, SceneLeave, Command } from '@xtcry/nestjs-telegraf';
 import { HELLO_SCENE_ID } from '../../app.constants';
 import { Context } from '../../interfaces/context.interface';
 

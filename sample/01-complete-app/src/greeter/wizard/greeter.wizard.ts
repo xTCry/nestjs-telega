@@ -1,4 +1,4 @@
-import { Ctx, Message, On, Wizard, WizardStep } from 'nestjs-telegraf';
+import { Ctx, Message, On, Wizard, WizardStep } from '@xtcry/nestjs-telegraf';
 import { WIZARD_SCENE_ID } from '../../app.constants';
 import { WizardContext } from 'telegraf/typings/scenes';
 
