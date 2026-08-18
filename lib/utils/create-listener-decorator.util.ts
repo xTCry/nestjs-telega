@@ -5,8 +5,8 @@ import { ListenerMetadata } from '../interfaces';
 
 export function createListenerDecorator<
   TComposer extends Composer<never>,
-  TMethod extends
-    OnlyFunctionPropertyNames<TComposer> = OnlyFunctionPropertyNames<TComposer>,
+  TMethod extends OnlyFunctionPropertyNames<TComposer> =
+    OnlyFunctionPropertyNames<TComposer>,
 >(method: TMethod) {
   return (...args: ComposerMethodArgs<TComposer, TMethod>): MethodDecorator => {
     return (

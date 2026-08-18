@@ -1,5 +1,8 @@
 # dependencies
 /node_modules
+/_cacache
+/_logs
+/_update-notifier-last-checked
 
 # IDE
 /.idea
@@ -11,7 +14,6 @@ npm-debug.log
 .DS_Store
 
 # tests
-/test
 /coverage
 /.nyc_output
 
@@ -22,4 +24,3 @@ dist
 .vitepress/cache
 .vitepress/dist
 docs-api
-
