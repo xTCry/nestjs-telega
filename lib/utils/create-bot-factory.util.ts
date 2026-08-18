@@ -9,17 +9,32 @@ export function createBotFactory(
 
   bot.use(...(options.middlewares ?? []));
   if (options.useCatchLogger !== false) {
-    bot.catch((err: Error, ctx) =>
+    bot.catch((err, ctx) => {
+      const error = err instanceof Error ? err : new Error(String(err));
+
       (options.useCatchLogger || Logger.error)(
-        `OnUpdateType(${ctx?.updateType}): ${err}`,
-        err.stack,
-        `Telegraf: ${ctx.botInfo.username}`,
-      ),
-    );
+        `OnUpdateType(${ctx?.updateType}): ${error.message}`,
+        error.stack,
+        `Telegraf: ${ctx.botInfo?.username ?? ''}`,
+      );
+    });
   }
 
   if (options.launchOptions !== false) {
-    void bot.launch(options.launchOptions);
+    const launchPromise = options.launchOptions
+      ? bot.launch(options.launchOptions)
+      : bot.launch();
+
+    void launchPromise.catch((error: unknown) => {
+      const launchError =
+        error instanceof Error ? error : new Error(String(error));
+
+      (options.useCatchLogger || Logger.error)(
+        `Failed to launch bot: ${launchError.message}`,
+        launchError.stack,
+        'Telegraf',
+      );
+    });
   }
 
   return Promise.resolve(bot);
