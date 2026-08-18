@@ -2,7 +2,7 @@ import { Telegraf } from 'telegraf';
 import { TelegrafModuleOptions } from '../interfaces';
 import { Logger } from '@nestjs/common';
 
-export async function createBotFactory(
+export function createBotFactory(
   options: TelegrafModuleOptions,
 ): Promise<Telegraf<any>> {
   const bot = new Telegraf<any>(options.token, options.options);
@@ -19,8 +19,8 @@ export async function createBotFactory(
   }
 
   if (options.launchOptions !== false) {
-    bot.launch(options.launchOptions);
+    void bot.launch(options.launchOptions);
   }
 
-  return bot;
+  return Promise.resolve(bot);
 }
