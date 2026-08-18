@@ -46,6 +46,7 @@ export default tseslint.config(
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/no-redundant-type-constituents': 'warn',
       '@typescript-eslint/only-throw-error': 'warn',
+      '@typescript-eslint/no-base-to-string': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-unused-expressions': 'off',
       'no-useless-escape': 'off',

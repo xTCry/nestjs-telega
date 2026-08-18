@@ -1,5 +1,6 @@
-import { createListenerDecorator } from '../../utils';
-import { Scenes } from 'telegraf';
+import { SetMetadata } from '@nestjs/common';
+import { SCENE_ENTER_METADATA } from '../../telegraf.constants';
 
-export const SceneEnter =
-  createListenerDecorator<Scenes.BaseScene<never>>('enter');
+/** Помечает метод как обработчик входа в сцену. */
+export const SceneEnter = (): MethodDecorator =>
+  SetMetadata(SCENE_ENTER_METADATA, true);

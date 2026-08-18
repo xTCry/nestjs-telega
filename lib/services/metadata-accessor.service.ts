@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import {
   SCENE_METADATA,
+  SCENE_ENTER_METADATA,
+  SCENE_LEAVE_METADATA,
   LISTENERS_METADATA,
   UPDATE_METADATA,
   WIZARD_STEP_METADATA,
@@ -38,6 +40,14 @@ export class MetadataAccessorService {
 
   getSceneMetadata(target: Function): SceneMetadata | undefined {
     return this.reflector.get(SCENE_METADATA, target);
+  }
+
+  isSceneEnter(target: Function): boolean {
+    return !!this.reflector.get(SCENE_ENTER_METADATA, target);
+  }
+
+  isSceneLeave(target: Function): boolean {
+    return !!this.reflector.get(SCENE_LEAVE_METADATA, target);
   }
 
   getWizardStepMetadata(target: Function): WizardStepMetadata | undefined {

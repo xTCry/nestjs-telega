@@ -2,17 +2,16 @@
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
-    "noImplicitAny": false,
     "removeComments": false,
     "noLib": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "es2021",
     "sourceMap": false,
-    "rootDir": "./lib",
     "outDir": "./dist",
+    "strict": true,
     "skipLibCheck": true
   },
-  "include": ["lib/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "include": ["lib/**/*", "test/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

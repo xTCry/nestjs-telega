@@ -1,10 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
-import { Hears, InjectAllBots, InjectBot, On, Use } from '../lib/decorators';
+import {
+  Hears,
+  InjectAllBots,
+  InjectBot,
+  On,
+  SceneEnter,
+  SceneLeave,
+  Use,
+} from '../lib/decorators';
 import { ListenerMetadata } from '../lib/interfaces';
 import { allBotsMap } from '../lib/telegraf-all-bots.provider';
-import { LISTENERS_METADATA } from '../lib/telegraf.constants';
+import {
+  LISTENERS_METADATA,
+  SCENE_ENTER_METADATA,
+  SCENE_LEAVE_METADATA,
+} from '../lib/telegraf.constants';
 import { getAllBotsToken, getBotToken } from '../lib/utils';
 
 describe('public decorators', () => {
@@ -44,7 +56,8 @@ describe('public decorators', () => {
     const descriptor = getMethodDescriptor(UpdateHandler.prototype, 'handle');
     On('message')(UpdateHandler.prototype, 'handle', descriptor);
     Hears('/start')(UpdateHandler.prototype, 'handle', descriptor);
-    Use()(UpdateHandler.prototype, 'handle', descriptor);
+    const useDecorator = Use as unknown as () => MethodDecorator;
+    useDecorator()(UpdateHandler.prototype, 'handle', descriptor);
 
     expect(
       Reflect.getMetadata(
@@ -56,6 +69,33 @@ describe('public decorators', () => {
       { method: 'hears', args: ['/start'] },
       { method: 'use', args: [] },
     ]);
+  });
+
+  it('marks scene lifecycle handlers separately from update listeners', () => {
+    class SceneHandler {
+      onEnter(): void {}
+
+      onLeave(): void {}
+    }
+
+    const enterDescriptor = getMethodDescriptor(
+      SceneHandler.prototype,
+      'onEnter',
+    );
+    const leaveDescriptor = getMethodDescriptor(
+      SceneHandler.prototype,
+      'onLeave',
+    );
+
+    SceneEnter()(SceneHandler.prototype, 'onEnter', enterDescriptor);
+    SceneLeave()(SceneHandler.prototype, 'onLeave', leaveDescriptor);
+
+    expect(
+      Reflect.getMetadata(SCENE_ENTER_METADATA, enterDescriptor.value),
+    ).toBe(true);
+    expect(
+      Reflect.getMetadata(SCENE_LEAVE_METADATA, leaveDescriptor.value),
+    ).toBe(true);
   });
 });
 

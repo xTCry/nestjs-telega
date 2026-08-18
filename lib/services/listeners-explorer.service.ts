@@ -5,7 +5,7 @@ import { MetadataScanner } from '@nestjs/core/metadata-scanner';
 import { Module } from '@nestjs/core/injector/module';
 import { ParamMetadata } from '@nestjs/core/helpers/interfaces';
 import { ExternalContextCreator } from '@nestjs/core/helpers/external-context-creator';
-import { Composer, Context, Scenes, Telegraf } from 'telegraf';
+import { Composer, Context, MiddlewareFn, Scenes, Telegraf } from 'telegraf';
 
 import { MetadataAccessorService } from './metadata-accessor.service';
 import {
@@ -25,7 +25,7 @@ export class ListenersExplorerService
   implements OnModuleInit
 {
   private readonly telegrafParamsFactory = new TelegrafParamsFactory();
-  private bot: Telegraf<any>;
+  private bot!: Telegraf<any>;
 
   constructor(
     @Inject(TELEGRAF_STAGE)
@@ -96,21 +96,28 @@ export class ListenersExplorerService
     const scenes = this.flatMap<InstanceWrapper>(modules, (wrapper) =>
       this.filterScenes(wrapper),
     );
-    const sceneIds = [];
+    const sceneIds = new Set<string>();
     scenes.forEach((wrapper) => {
-      const { sceneId, type, options } = this.metadataAccessor.getSceneMetadata(
+      const sceneMetadata = this.metadataAccessor.getSceneMetadata(
         wrapper.instance.constructor,
       );
-      if (sceneIds.includes(sceneId)) {
+
+      if (!sceneMetadata) {
+        return;
+      }
+
+      const { sceneId, type, options } = sceneMetadata;
+      if (sceneIds.has(sceneId)) {
         throw new Error(`Two scenes with the same id ${sceneId} were detected`);
       }
-      sceneIds.push(sceneId);
+      sceneIds.add(sceneId);
 
       const scene =
         type === 'base'
           ? new Scenes.BaseScene<any>(sceneId, options || ({} as any))
           : new Scenes.WizardScene<any>(sceneId, options || ({} as any));
       this.stage.register(scene);
+      this.registerSceneLifecycleListeners(scene, wrapper);
 
       if (type === 'base') {
         this.registerListeners(scene, wrapper);
@@ -120,9 +127,61 @@ export class ListenersExplorerService
     });
   }
 
-  private filterComposers(wrapper: InstanceWrapper): InstanceWrapper<unknown> {
+  /** Регистрирует обработчики входа и выхода, не смешивая их с update-listener-ами. */
+  private registerSceneLifecycleListeners(
+    scene: Scenes.BaseScene<any>,
+    wrapper: InstanceWrapper<unknown>,
+  ): void {
     const { instance } = wrapper;
-    if (!instance) return undefined;
+    if (!instance || typeof instance !== 'object') {
+      return;
+    }
+
+    const prototype = Object.getPrototypeOf(instance) as Record<
+      string,
+      (...args: any[]) => any
+    >;
+
+    this.metadataScanner.scanFromPrototype(
+      instance,
+      prototype,
+      (methodName) => {
+        const methodRef = prototype[methodName];
+        const listenerCallbackFn = this.createContextCallback(
+          instance,
+          prototype,
+          methodName,
+        ) as MiddlewareFn<Context> | undefined;
+
+        if (!listenerCallbackFn) {
+          return;
+        }
+
+        // Сохраняем единый контракт listener-ов: строковый результат метода
+        // автоматически отправляется пользователю, включая enter/leave-события.
+        const listener: MiddlewareFn<Context> = async (ctx, next) => {
+          const result = await listenerCallbackFn(ctx, next);
+          if (result) {
+            await ctx.reply(String(result));
+          }
+        };
+
+        if (this.metadataAccessor.isSceneEnter(methodRef)) {
+          scene.enter(listener);
+        }
+
+        if (this.metadataAccessor.isSceneLeave(methodRef)) {
+          scene.leave(listener);
+        }
+      },
+    );
+  }
+
+  private filterComposers(
+    wrapper: InstanceWrapper,
+  ): InstanceWrapper<unknown> | undefined {
+    const { instance } = wrapper;
+    if (!instance || !wrapper.metatype) return undefined;
 
     const isComposer = this.metadataAccessor.isComposer(wrapper.metatype);
     if (!isComposer) return undefined;
@@ -130,9 +189,11 @@ export class ListenersExplorerService
     return wrapper;
   }
 
-  private filterUpdates(wrapper: InstanceWrapper): InstanceWrapper<unknown> {
+  private filterUpdates(
+    wrapper: InstanceWrapper,
+  ): InstanceWrapper<unknown> | undefined {
     const { instance } = wrapper;
-    if (!instance) return undefined;
+    if (!instance || !wrapper.metatype) return undefined;
 
     const isUpdate = this.metadataAccessor.isUpdate(wrapper.metatype);
     if (!isUpdate) return undefined;
@@ -140,9 +201,11 @@ export class ListenersExplorerService
     return wrapper;
   }
 
-  private filterScenes(wrapper: InstanceWrapper): InstanceWrapper<unknown> {
+  private filterScenes(
+    wrapper: InstanceWrapper,
+  ): InstanceWrapper<unknown> | undefined {
     const { instance } = wrapper;
-    if (!instance) return undefined;
+    if (!instance || !wrapper.metatype) return undefined;
 
     const isScene = this.metadataAccessor.isScene(wrapper.metatype);
     if (!isScene) return undefined;
@@ -155,7 +218,14 @@ export class ListenersExplorerService
     wrapper: InstanceWrapper<unknown>,
   ): void {
     const { instance } = wrapper;
-    const prototype = Object.getPrototypeOf(instance);
+    if (!instance || typeof instance !== 'object') {
+      return;
+    }
+
+    const prototype = Object.getPrototypeOf(instance) as Record<
+      string,
+      (...args: any[]) => any
+    >;
     this.metadataScanner.scanFromPrototype(instance, prototype, (name) =>
       this.registerIfListener(composer, instance, prototype, name),
     );
@@ -166,11 +236,18 @@ export class ListenersExplorerService
     wrapper: InstanceWrapper<unknown>,
   ): void {
     const { instance } = wrapper;
-    const prototype = Object.getPrototypeOf(instance);
+    if (!instance || typeof instance !== 'object') {
+      return;
+    }
+
+    const prototype = Object.getPrototypeOf(instance) as Record<
+      string,
+      (...args: any[]) => any
+    >;
 
     type WizardMetadata = { step: number; methodName: string };
     const wizardSteps: WizardMetadata[] = [];
-    const basicListeners = [];
+    const basicListeners: string[] = [];
 
     this.metadataScanner.scanFromPrototype(
       instance,
@@ -217,8 +294,8 @@ export class ListenersExplorerService
 
   private registerIfListener(
     composer: Composer<any>,
-    instance: any,
-    prototype: any,
+    instance: object,
+    prototype: Record<string, (...args: any[]) => any>,
     methodName: string,
     defaultMetadata?: ListenerMetadata[],
   ): void {
@@ -233,16 +310,25 @@ export class ListenersExplorerService
       instance,
       prototype,
       methodName,
-    );
+    ) as MiddlewareFn<Context> | undefined;
+
+    if (!listenerCallbackFn) {
+      return;
+    }
 
     for (const { method, args } of metadata) {
       /* Basic callback */
       // composer[method](...args, listenerCallbackFn);
 
       /* Complex callback return value handing */
-      composer[method](
+      const register = composer[method as keyof Composer<any>] as unknown as (
+        ...middleware: unknown[]
+      ) => Composer<any>;
+
+      register.call(
+        composer,
         ...args,
-        async (ctx: Context, next: Function): Promise<void> => {
+        async (ctx: Context, next: () => Promise<void>): Promise<void> => {
           const result = await listenerCallbackFn(ctx, next);
           if (result) {
             await ctx.reply(String(result));
@@ -253,9 +339,9 @@ export class ListenersExplorerService
     }
   }
 
-  createContextCallback<T extends Record<string, unknown>>(
-    instance: T,
-    prototype: unknown,
+  private createContextCallback(
+    instance: object,
+    prototype: Record<string, (...args: any[]) => any>,
     methodName: string,
   ) {
     const paramsFactory = this.telegrafParamsFactory;
@@ -270,7 +356,7 @@ export class ListenersExplorerService
       paramsFactory,
       undefined,
       undefined,
-      undefined,
+      { guards: true, filters: true, interceptors: true },
       'telegraf',
     );
   }

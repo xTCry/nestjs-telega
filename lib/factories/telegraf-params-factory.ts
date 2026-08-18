@@ -18,11 +18,20 @@ export class TelegrafParamsFactory implements ParamsFactory {
       case TelegrafParamtype.NEXT:
         return next;
       case TelegrafParamtype.SENDER:
-        return data && ctx.from ? ctx.from[data as string] : ctx.from;
+        return getContextProperty(ctx.from, data);
       case TelegrafParamtype.MESSAGE:
-        return data && ctx.message ? ctx.message[data as string] : ctx.message;
+        return getContextProperty(ctx.message, data);
       default:
         return null;
     }
   }
+}
+
+/** Возвращает поле Telegram-сущности, если decorator получил строковый ключ. */
+function getContextProperty(value: unknown, data: ParamData): unknown {
+  if (typeof data !== 'string' || !value || typeof value !== 'object') {
+    return value;
+  }
+
+  return (value as Record<string, unknown>)[data];
 }

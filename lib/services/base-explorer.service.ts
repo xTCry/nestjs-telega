@@ -1,13 +1,12 @@
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import { Module } from '@nestjs/core/injector/module';
-import { flattenDeep, identity, isEmpty } from 'lodash';
 
 export class BaseExplorerService {
   getModules(
     modulesContainer: Map<string, Module>,
     include: Function[],
   ): Module[] {
-    if (!include || isEmpty(include)) {
+    if (!include || include.length === 0) {
       return [...modulesContainer.values()];
     }
     return this.includeWhitelisted(modulesContainer, include);
@@ -23,30 +22,36 @@ export class BaseExplorerService {
 
   flatMap<T>(
     modules: Module[],
-    callback: (instance: InstanceWrapper, moduleRef: Module) => T | T[],
+    callback: (
+      instance: InstanceWrapper,
+      moduleRef: Module,
+    ) => T | T[] | undefined,
   ): T[] {
     const visitedModules = new Set<Module>();
 
-    const unwrap = (moduleRef: Module) => {
-      // protection from circular recursion
+    const unwrap = (moduleRef: Module): T[] => {
+      // Защита от циклических imports при обходе Nest-модулей.
       if (visitedModules.has(moduleRef)) {
         return [];
-      } else {
-        visitedModules.add(moduleRef);
       }
+      visitedModules.add(moduleRef);
 
       const providers = [...moduleRef.providers.values()];
-      const defined = providers.map((wrapper) => callback(wrapper, moduleRef));
+      const defined = providers.flatMap((wrapper) => {
+        const result = callback(wrapper, moduleRef);
 
-      const imported: (T | T[])[] = moduleRef.imports?.size
-        ? [...moduleRef.imports.values()].reduce((prev, cur) => {
-            return [...prev, ...unwrap(cur)];
-          }, [])
-        : [];
+        if (result === undefined) {
+          return [];
+        }
+
+        return Array.isArray(result) ? result : [result];
+      });
+
+      const imported = [...moduleRef.imports.values()].flatMap(unwrap);
 
       return [...defined, ...imported];
     };
 
-    return flattenDeep(modules.map(unwrap)).filter(identity);
+    return modules.flatMap(unwrap);
   }
 }
