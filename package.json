@@ -82,7 +82,7 @@
     "@nestjs/core": "^11.1.0",
     "@nestjs/testing": "^11.1.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.13.3",
+    "@types/node": "^26.2.0",
     "@typescript-eslint/eslint-plugin": "8.50.0",
     "@typescript-eslint/parser": "8.50.0",
     "eslint": "9.39.2",
