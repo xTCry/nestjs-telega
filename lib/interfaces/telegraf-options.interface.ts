@@ -1,14 +1,18 @@
-import { ModuleMetadata, Type } from '@nestjs/common/interfaces';
-import { Middleware, Telegraf } from 'telegraf';
+import type {
+  InjectionToken,
+  ModuleMetadata,
+  Type,
+} from '@nestjs/common/interfaces';
+import type { Context, Middleware, Telegraf } from 'telegraf';
 
 export interface TelegrafModuleOptions {
   token: string;
   botName?: string;
-  options?: Partial<Telegraf.Options<any>>;
+  options?: Partial<Telegraf.Options<Context>>;
   launchOptions?: Telegraf.LaunchOptions | false;
   include?: Function[];
-  middlewares?: ReadonlyArray<Middleware<any>>;
-  useCatchLogger?: ((err: any, ctx: any) => void) | false;
+  middlewares?: ReadonlyArray<Middleware<Context>>;
+  useCatchLogger?: ((err: Error, ctx?: Context) => void) | false;
 }
 
 export interface TelegrafOptionsFactory {
@@ -25,7 +29,7 @@ export interface TelegrafModuleAsyncOptions extends Pick<
   useExisting?: Type<TelegrafOptionsFactory>;
   useClass?: Type<TelegrafOptionsFactory>;
   useFactory?: (
-    ...args: any[]
+    ...args: unknown[]
   ) => Promise<TelegrafModuleOptions> | TelegrafModuleOptions;
-  inject?: any[];
+  inject?: InjectionToken[];
 }

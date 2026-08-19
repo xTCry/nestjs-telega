@@ -1,37 +1,36 @@
 import { Composer } from 'telegraf';
 
-import { ListenerMetadata } from '../interfaces';
-import { LISTENERS_METADATA } from '../telegraf.constants';
-import { ComposerMethodArgs, OnlyFunctionPropertyNames } from '../types';
+import type { ListenerMetadata } from '../interfaces';
+import type { ComposerMethodArgs, OnlyFunctionPropertyNames } from '../types';
+import { createAppendDecorator } from './create-append-decorator.util';
 
-export function createListenerDecorator<
+export type ListenerDecoratorFactory = <
   TComposer extends Composer<never>,
   TMethod extends OnlyFunctionPropertyNames<TComposer> =
     OnlyFunctionPropertyNames<TComposer>,
->(method: TMethod) {
-  return (...args: ComposerMethodArgs<TComposer, TMethod>): MethodDecorator => {
-    return (
-      target: object,
-      _key?: string | symbol,
-      descriptor?: TypedPropertyDescriptor<any>,
-    ) => {
-      const metadata = [
-        {
-          method,
-          args,
-        } as ListenerMetadata,
-      ];
+>(
+  method: TMethod,
+) => (...args: ComposerMethodArgs<TComposer, TMethod>) => MethodDecorator;
 
-      if (descriptor) {
-        const previousValue =
-          Reflect.getMetadata(LISTENERS_METADATA, descriptor.value) || [];
-        const value = [...previousValue, ...metadata];
-        Reflect.defineMetadata(LISTENERS_METADATA, value, descriptor.value);
-        return descriptor;
-      }
+/** Общая factory всех публичных listener-декораторов. */
+const ListenerMetadataDecorator = createAppendDecorator<ListenerMetadata>();
 
-      Reflect.defineMetadata(LISTENERS_METADATA, metadata, target);
-      return target;
-    };
-  };
-}
+export const ListenerDecorator: ListenerDecoratorFactory & { KEY: string } = (<
+    TComposer extends Composer<never>,
+    TMethod extends OnlyFunctionPropertyNames<TComposer> =
+      OnlyFunctionPropertyNames<TComposer>,
+  >(
+    method: TMethod,
+  ) =>
+  (...args: ComposerMethodArgs<TComposer, TMethod>): MethodDecorator =>
+    ListenerMetadataDecorator({
+      method,
+      args,
+    } as unknown as ListenerMetadata)) as ListenerDecoratorFactory & {
+  KEY: string;
+};
+
+ListenerDecorator.KEY = ListenerMetadataDecorator.KEY;
+
+/** @deprecated Внутренний alias; новые декораторы используют ListenerDecorator. */
+export const createListenerDecorator = ListenerDecorator;

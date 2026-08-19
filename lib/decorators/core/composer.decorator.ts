@@ -1,9 +1,6 @@
-import { SetMetadata } from '@nestjs/common';
-
-import { COMPOSER_METADATA } from '../../telegraf.constants';
+import { Reflector } from '@nestjs/core';
 
 /**
  * `@Composer` like Update decorator, executed before scene handlers.
  */
-export const Composer = (): ClassDecorator =>
-  SetMetadata(COMPOSER_METADATA, true);
+export const Composer = Reflector.createDecorator();

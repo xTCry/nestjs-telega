@@ -1,20 +1,25 @@
 import { Logger } from '@nestjs/common';
-import { Telegraf } from 'telegraf';
+import { Context, Telegraf } from 'telegraf';
 
 import { TelegrafModuleOptions } from '../interfaces';
 
 export function createBotFactory(
   options: TelegrafModuleOptions,
-): Promise<Telegraf<any>> {
-  const bot = new Telegraf<any>(options.token, options.options);
+): Promise<Telegraf<Context>> {
+  const bot = new Telegraf<Context>(options.token, options.options);
 
   bot.use(...(options.middlewares ?? []));
   if (options.useCatchLogger !== false) {
     bot.catch((err, ctx) => {
       const error = err instanceof Error ? err : new Error(String(err));
 
-      (options.useCatchLogger || Logger.error)(
-        `OnUpdateType(${ctx?.updateType}): ${error.message}`,
+      if (options.useCatchLogger) {
+        options.useCatchLogger(error, ctx);
+        return;
+      }
+
+      Logger.error(
+        `OnUpdateType(${ctx.updateType}): ${error.message}`,
         error.stack,
         `Telegraf: ${ctx.botInfo?.username ?? ''}`,
       );
@@ -30,7 +35,12 @@ export function createBotFactory(
       const launchError =
         error instanceof Error ? error : new Error(String(error));
 
-      (options.useCatchLogger || Logger.error)(
+      if (options.useCatchLogger) {
+        options.useCatchLogger(launchError);
+        return;
+      }
+
+      Logger.error(
         `Failed to launch bot: ${launchError.message}`,
         launchError.stack,
         'Telegraf',

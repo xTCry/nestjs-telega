@@ -1,10 +1,12 @@
-import { assignMetadata, PipeTransform, Type } from '@nestjs/common';
+import { assignMetadata, ParamData, PipeTransform, Type } from '@nestjs/common';
+import { isNil, isObject, isString } from '@nestjs/common/utils/shared.utils';
 
 import { TelegrafParamtype } from '../enums/telegraf-paramtype.enum';
 import { PARAM_ARGS_METADATA } from '../telegraf.constants';
 
-export type ParamData = object | string | number;
-type ParamDecoratorData = string | Type<PipeTransform> | PipeTransform;
+type TelegrafPipe = Type<PipeTransform> | PipeTransform;
+type ParamDecoratorData = ParamData | TelegrafPipe;
+type ParameterDecoratorTarget = object & { constructor: Function };
 
 export const createTelegrafParamDecorator =
   (paramtype: TelegrafParamtype) =>
@@ -26,10 +28,7 @@ export const createTelegrafParamDecorator =
 
 export const createTelegrafPipesParamDecorator =
   (paramtype: TelegrafParamtype) =>
-  (
-    data?: ParamDecoratorData,
-    ...pipes: (Type<PipeTransform> | PipeTransform)[]
-  ): ParameterDecorator =>
+  (data?: ParamDecoratorData, ...pipes: TelegrafPipe[]): ParameterDecorator =>
   (target, key, index) => {
     if (key === undefined) {
       return;
@@ -41,20 +40,22 @@ export const createTelegrafPipesParamDecorator =
 export const addPipesMetadata = (
   paramtype: TelegrafParamtype,
   data: ParamDecoratorData | undefined,
-  pipes: (Type<PipeTransform> | PipeTransform)[],
-  target: object,
+  pipes: TelegrafPipe[],
+  target: ParameterDecoratorTarget,
   key: string | symbol,
   index: number,
 ) => {
   const args =
     Reflect.getMetadata(PARAM_ARGS_METADATA, target.constructor, key) || {};
-  const hasParamData = typeof data === 'string';
+  const hasParamData =
+    isNil(data) || isString(data) || typeof data === 'number';
   const paramData = hasParamData ? data : undefined;
-  const paramPipes = hasParamData
-    ? pipes
-    : data === undefined
+  const paramPipes: TelegrafPipe[] =
+    hasParamData || data === undefined
       ? pipes
-      : [data, ...pipes];
+      : isObject(data) && 'transform' in data
+        ? [data as TelegrafPipe, ...pipes]
+        : pipes;
 
   Reflect.defineMetadata(
     PARAM_ARGS_METADATA,

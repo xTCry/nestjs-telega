@@ -1,8 +1,8 @@
-import { createListenerDecorator } from '../../utils';
+import { ListenerDecorator } from '../../utils';
 
 /**
  * Handler for /settings command.
  *
  * @see https://telegraf.js.org/#/?id=settings
  */
-export const Settings = createListenerDecorator('settings');
+export const Settings = ListenerDecorator('settings');

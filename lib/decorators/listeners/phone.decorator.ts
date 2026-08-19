@@ -1,8 +1,8 @@
-import { createListenerDecorator } from '../../utils';
+import { ListenerDecorator } from '../../utils';
 
 /**
  * Phone number handling.
  *
  * @see https://telegraf.js.org/#/?id=phone
  */
-export const Phone = createListenerDecorator('phone');
+export const Phone = ListenerDecorator('phone');

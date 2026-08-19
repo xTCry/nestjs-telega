@@ -8,13 +8,14 @@ import {
   Type,
 } from '@nestjs/common';
 import { DiscoveryModule, ModuleRef } from '@nestjs/core';
+import type { Context, Telegraf } from 'telegraf';
 
 import {
   TelegrafModuleAsyncOptions,
   TelegrafModuleOptions,
   TelegrafOptionsFactory,
 } from './interfaces';
-import { ListenersExplorerService, MetadataAccessorService } from './services';
+import { ListenersExplorerService } from './services';
 import { telegrafStageProvider } from './stage.provider';
 import {
   allBotsMap,
@@ -29,7 +30,7 @@ import { createBotFactory, getBotToken } from './utils';
 @Global()
 @Module({
   imports: [DiscoveryModule],
-  providers: [ListenersExplorerService, MetadataAccessorService],
+  providers: [ListenersExplorerService],
 })
 export class TelegrafCoreModule implements OnApplicationShutdown {
   constructor(
@@ -116,9 +117,12 @@ export class TelegrafCoreModule implements OnApplicationShutdown {
     };
   }
 
-  async onApplicationShutdown(): Promise<void> {
-    const bot = this.moduleRef.get<any>(this.botName);
-    bot && (await bot.stop());
+  onApplicationShutdown(): void {
+    const bot = this.moduleRef.get<Telegraf<Context> | undefined>(
+      this.botName,
+      { strict: false },
+    );
+    bot?.stop();
   }
 
   private static createAsyncProviders(

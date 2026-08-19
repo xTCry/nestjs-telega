@@ -1,9 +1,7 @@
-import { SetMetadata } from '@nestjs/common';
-
-import { UPDATE_METADATA } from '../../telegraf.constants';
+import { Reflector } from '@nestjs/core';
 
 /**
  * `@Update` decorator, it's like NestJS `@Controller` decorator,
  * but for Telegram Bot API updates.
  */
-export const Update = (): ClassDecorator => SetMetadata(UPDATE_METADATA, true);
+export const Update = Reflector.createDecorator();

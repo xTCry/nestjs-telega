@@ -14,11 +14,11 @@ export class TelegrafArgumentsHost
     return tgContext;
   }
 
-  getContext<T = any>(): T {
+  getContext<T = unknown>(): T {
     return this.getArgByIndex(0);
   }
 
-  getNext<T = any>(): T {
+  getNext<T = unknown>(): T {
     return this.getArgByIndex(1);
   }
 }

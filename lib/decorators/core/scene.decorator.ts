@@ -1,15 +1,19 @@
-import { SetMetadata } from '@nestjs/common';
-import { SceneOptions } from 'telegraf/typings/scenes/base';
+import { Reflector } from '@nestjs/core';
+import type { Context } from 'telegraf';
+import type { SceneOptions } from 'telegraf/typings/scenes/base';
 
 import { SceneMetadata } from '../../interfaces';
-import { SCENE_METADATA } from '../../telegraf.constants';
 
-export const Scene = (
+/** Внутренний reflectable decorator общего metadata base- и wizard-сцен. */
+export const SceneMetadataDecorator =
+  Reflector.createDecorator<SceneMetadata>();
+
+export type SceneDecorator = (
   sceneId: string,
-  options?: SceneOptions<any>,
-): ClassDecorator =>
-  SetMetadata<string, SceneMetadata>(SCENE_METADATA, {
-    sceneId,
-    type: 'base',
-    options,
-  });
+  options?: SceneOptions<Context>,
+) => ClassDecorator;
+
+export const Scene: SceneDecorator = (
+  sceneId: string,
+  options?: SceneOptions<Context>,
+): ClassDecorator => SceneMetadataDecorator({ sceneId, type: 'base', options });

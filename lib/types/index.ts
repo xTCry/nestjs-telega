@@ -1,6 +1,6 @@
 import { Composer, Middleware } from 'telegraf';
 
-export type Filter<T extends any[], F> = T extends []
+export type Filter<T extends readonly unknown[], F> = T extends []
   ? []
   : T extends [infer Head, ...infer Tail]
     ? Head extends F
@@ -9,14 +9,23 @@ export type Filter<T extends any[], F> = T extends []
     : [];
 
 export type OnlyFunctionPropertyNames<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
+  [K in keyof T]: T[K] extends (...args: never[]) => unknown ? K : never;
 }[keyof T];
 
-type ParametersOrNever<T> = T extends (...args: any[]) => any
+type ParametersOrNever<T> = T extends (...args: never[]) => unknown
   ? Parameters<T>
   : never;
+
+type BaseComposerMethodArgs<
+  TComposer extends Composer<never>,
+  TMethod extends OnlyFunctionPropertyNames<TComposer>,
+> = Filter<ParametersOrNever<TComposer[TMethod]>, Middleware<never>>;
+
+type NonEmptyArray<T> = [T, ...T[]];
 
 export type ComposerMethodArgs<
   T extends Composer<never>,
   U extends OnlyFunctionPropertyNames<T> = OnlyFunctionPropertyNames<T>,
-> = Filter<ParametersOrNever<T[U]>, Middleware<never>>;
+> = U extends 'use'
+  ? BaseComposerMethodArgs<T, U>
+  : NonEmptyArray<BaseComposerMethodArgs<T, U>[number]>;

@@ -1,8 +1,8 @@
-import { createListenerDecorator } from '../../utils';
+import { ListenerDecorator } from '../../utils';
 
 /**
  * Registers middleware for handling inline_query actions with regular expressions.
  *
  * @see https://telegraf.js.org/#/?id=inlinequery
  */
-export const InlineQuery = createListenerDecorator('inlineQuery');
+export const InlineQuery = ListenerDecorator('inlineQuery');

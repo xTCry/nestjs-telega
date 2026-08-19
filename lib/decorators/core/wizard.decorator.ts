@@ -1,15 +1,15 @@
-import { SetMetadata } from '@nestjs/common';
-import { SceneOptions } from 'telegraf/typings/scenes/base';
+import type { Context } from 'telegraf';
+import type { SceneOptions } from 'telegraf/typings/scenes/base';
 
-import { SceneMetadata } from '../../interfaces';
-import { SCENE_METADATA } from '../../telegraf.constants';
+import { SceneMetadataDecorator } from './scene.decorator';
 
-export const Wizard = (
+type WizardDecorator = (
   sceneId: string,
-  options?: SceneOptions<any>,
+  options?: SceneOptions<Context>,
+) => ClassDecorator;
+
+export const Wizard: WizardDecorator = (
+  sceneId: string,
+  options?: SceneOptions<Context>,
 ): ClassDecorator =>
-  SetMetadata<string, SceneMetadata>(SCENE_METADATA, {
-    sceneId,
-    type: 'wizard',
-    options,
-  });
+  SceneMetadataDecorator({ sceneId, type: 'wizard', options });

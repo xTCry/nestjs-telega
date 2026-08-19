@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 
 import {
@@ -6,18 +7,18 @@ import {
   InjectAllBots,
   InjectBot,
   On,
+  Scene,
   SceneEnter,
   SceneLeave,
+  SceneMetadataDecorator,
   Use,
+  Wizard,
+  WizardStep,
+  WizardStepMetadataDecorator,
 } from '../lib/decorators';
 import { ListenerMetadata } from '../lib/interfaces';
 import { allBotsMap } from '../lib/telegraf-all-bots.provider';
-import {
-  LISTENERS_METADATA,
-  SCENE_ENTER_METADATA,
-  SCENE_LEAVE_METADATA,
-} from '../lib/telegraf.constants';
-import { getAllBotsToken, getBotToken } from '../lib/utils';
+import { getAllBotsToken, getBotToken, ListenerDecorator } from '../lib/utils';
 
 describe('public decorators', () => {
   it('injects the named bot and all-bots registry outside a constructor', async () => {
@@ -59,11 +60,9 @@ describe('public decorators', () => {
     const useDecorator = Use as unknown as () => MethodDecorator;
     useDecorator()(UpdateHandler.prototype, 'handle', descriptor);
 
+    const reflector = new Reflector();
     expect(
-      Reflect.getMetadata(
-        LISTENERS_METADATA,
-        descriptor.value,
-      ) as ListenerMetadata[],
+      reflector.get(ListenerDecorator, descriptor.value) as ListenerMetadata[],
     ).toEqual([
       { method: 'on', args: ['message'] },
       { method: 'hears', args: ['/start'] },
@@ -90,12 +89,41 @@ describe('public decorators', () => {
     SceneEnter()(SceneHandler.prototype, 'onEnter', enterDescriptor);
     SceneLeave()(SceneHandler.prototype, 'onLeave', leaveDescriptor);
 
+    const reflector = new Reflector();
+    expect(reflector.get(SceneEnter, enterDescriptor.value)).toEqual({});
+    expect(reflector.get(SceneLeave, leaveDescriptor.value)).toEqual({});
+  });
+
+  it('exposes reflectable scene and wizard metadata through compatibility keys', () => {
+    class BaseSceneHandler {}
+    class WizardSceneHandler {
+      handle(): void {}
+    }
+
+    Scene('base-scene')(BaseSceneHandler);
+    Wizard('wizard-scene')(WizardSceneHandler);
+    const descriptor = getMethodDescriptor(
+      WizardSceneHandler.prototype,
+      'handle',
+    );
+    WizardStep(2)(WizardSceneHandler.prototype, 'handle', descriptor);
+
+    const reflector = new Reflector();
     expect(
-      Reflect.getMetadata(SCENE_ENTER_METADATA, enterDescriptor.value),
-    ).toBe(true);
+      reflector.get(SceneMetadataDecorator, BaseSceneHandler),
+    ).toMatchObject({
+      sceneId: 'base-scene',
+      type: 'base',
+    });
     expect(
-      Reflect.getMetadata(SCENE_LEAVE_METADATA, leaveDescriptor.value),
-    ).toBe(true);
+      reflector.get(SceneMetadataDecorator, WizardSceneHandler),
+    ).toMatchObject({
+      sceneId: 'wizard-scene',
+      type: 'wizard',
+    });
+    expect(
+      reflector.get(WizardStepMetadataDecorator, descriptor.value),
+    ).toEqual({ step: 2 });
   });
 });
 

@@ -1,7 +1,4 @@
-import { SetMetadata } from '@nestjs/common';
-
-import { SCENE_LEAVE_METADATA } from '../../telegraf.constants';
+import { Reflector } from '@nestjs/core';
 
 /** Помечает метод как обработчик выхода из сцены. */
-export const SceneLeave = (): MethodDecorator =>
-  SetMetadata(SCENE_LEAVE_METADATA, true);
+export const SceneLeave = Reflector.createDecorator();
