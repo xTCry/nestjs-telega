@@ -3,7 +3,7 @@ In some cases, you may need to run multiple bots at the same time. This can also
 ```typescript
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { TelegrafModule } from 'nestjs-telegraf';
+import { TelegrafModule } from 'nestjs-telega';
 
 @Module({
   imports: [
@@ -36,7 +36,7 @@ Please note that you shouldn't have multiple bots without a name, or with the sa
 You can also inject the `Bot` for a given bot:
 ```typescript
 import { Injectable } from '@nestjs/common';
-import { InjectBot, Telegraf, Context } from 'nestjs-telegraf';
+import { InjectBot, Telegraf, Context } from 'nestjs-telega';
 
 @Injectable()
 export class EchoService {
@@ -53,7 +53,7 @@ To inject a given `Bot` to a custom provider (for example, factory provider), us
   inject: [getBotToken('cat')],
 }
 ```
-Another useful feature of the `nestjs-telegraf` module is the ability to choose which modules should handle updates for each launched bot. By default, module searches for handlers throughout the whole app. To limit this scan to only a subset of modules, use the include property.
+Another useful feature of the `nestjs-telega` module is the ability to choose which modules should handle updates for each launched bot. By default, module searches for handlers throughout the whole app. To limit this scan to only a subset of modules, use the include property.
 
 ```typescript
 TelegrafModule.forRootAsync({

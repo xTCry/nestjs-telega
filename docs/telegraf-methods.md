@@ -1,5 +1,5 @@
 # Telegraf methods
-Each Telegraf instance method has own decorator in `nestjs-telegraf` package. The name of the decorator corresponds to the name of the Telegraf method. For example [`@Hears`](https://telegraf.js.org/classes/telegraf.html#hears), [`@On`](https://telegraf.js.org/classes/telegraf.html#on), [`@Action`](https://telegraf.js.org/classes/telegraf.html#action) and so on.
+Each Telegraf instance method has own decorator in `nestjs-telega` package. The name of the decorator corresponds to the name of the Telegraf method. For example [`@Hears`](https://telegraf.js.org/classes/telegraf.html#hears), [`@On`](https://telegraf.js.org/classes/telegraf.html#on), [`@Action`](https://telegraf.js.org/classes/telegraf.html#action) and so on.
 
 Now let's try simple example:
 
@@ -11,7 +11,7 @@ import {
   Help,
   On,
   Hears,
-} from 'nestjs-telegraf';
+} from 'nestjs-telega';
 import { TelegrafContext } from './common/interfaces/telegraf-context.interface.ts';
 
 @Update()

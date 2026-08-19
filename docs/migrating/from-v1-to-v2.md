@@ -3,12 +3,12 @@
 If you previously used decorators with the prefix `Telegraf` in the decorator name (such as `@TelegrafOn()` or `@TelegrafHelp()`) replace them with the same decorators but without the prefix `Telegraf`, such as `@On()`, `@Start()`, `@Command()` and so on.
 
 ## `@Update()` decorator
-Since v2, `nestjs-telegraf` looks for all update handlers only inside individual classes, under the `@Update()` decorator.
+Since v2, `nestjs-telega` looks for all update handlers only inside individual classes, under the `@Update()` decorator.
 
 Previously, you could declare a handler anywhere, for example:
 ```typescript title="src/cats/cats.provider.ts"
 import { Injectable } from '@nestjs/common';
-import { Command } from 'nestjs-telegraf';
+import { Command } from 'nestjs-telega';
 
 @Injectable()
 export class CatsProvider {
@@ -21,7 +21,7 @@ export class CatsProvider {
 
 Now you must explicitly bind the class, for Telegram Bot Api update handlers:
 ```typescript {3} title="src/cats/cats.updates.ts"
-import { Update, Ctx } from 'nestjs-telegraf';
+import { Update, Ctx } from 'nestjs-telega';
 
 @Update()
 export class HelpUpdate {

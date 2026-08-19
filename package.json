@@ -1,7 +1,7 @@
 {
-  "name": "@xtcry/nestjs-telegraf",
-  "version": "2.7.1",
-  "description": "Telegraf module for NestJS",
+  "name": "nestjs-telega",
+  "version": "1.0.0",
+  "description": "Telegram bot module for NestJS",
   "keywords": [
     "nest",
     "nestjs",
@@ -14,15 +14,21 @@
     "bot api",
     "bot framework"
   ],
-  "homepage": "https://nestjs-telegraf.vercel.app",
+  "homepage": "https://github.com/xTCry/nestjs-telega#readme",
   "bugs": {
-    "url": "https://github.com/evilsprut/nestjs-telegraf/issues"
+    "url": "https://github.com/xTCry/nestjs-telega/issues"
   },
-  "repository": "git@github.com:evilsprut/nestjs-telegraf.git",
-  "funding": "https://hypeer.company/donate",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xTCry/nestjs-telega.git"
+  },
   "license": "MIT",
-  "author": "Aleksandr Bukhalo <evilsprut@icloud.com>",
+  "author": "xTCry [Vladislav Kh] (https://github.com/xTCry/)",
   "contributors": [
+    {
+      "name": "Aleksandr Bukhalo",
+      "email": "evilsprut@icloud.com"
+    },
     {
       "name": "Arthur Asimov",
       "email": "arthur.asimov.z0@gmail.com"
@@ -30,6 +36,11 @@
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "format": "prettier --write \"lib/**/*.ts\" \"test/**/*.ts\"",

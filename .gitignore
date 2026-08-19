@@ -11,6 +11,7 @@
 
 # misc
 npm-debug.log
+*.tgz
 .DS_Store
 
 # tests

@@ -1,11 +1,13 @@
-# NestJS Telegraf ![npm](https://img.shields.io/npm/dm/@xtcry/nestjs-telegraf) ![GitHub last commit](https://img.shields.io/github/last-commit/xtcry/nestjs-telegraf) ![NPM](https://img.shields.io/npm/l/@xtcry/nestjs-telegraf)
+# NestJS Telega ![npm](https://img.shields.io/npm/dm/nestjs-telega) ![GitHub last commit](https://img.shields.io/github/last-commit/xTCry/nestjs-telega) ![NPM](https://img.shields.io/npm/l/nestjs-telega)
 
 <img align="right" width="95" height="148" title="NestJS logotype"
      src="https://nestjs.com/img/logo-small.svg">
 
-NestJS Telegraf – powerful solution for creating Telegram bots.
+NestJS Telega – powerful solution for creating Telegram bots.
 
 This package uses the best of the NodeJS world under the hood. [Telegraf](https://github.com/telegraf/telegraf) is the most powerful library for creating bots and [NestJS](https://github.com/nestjs) is a progressive framework for creating well-architectured applications. This module provides fast and easy way for creating Telegram bots and deep integration with your NestJS application. 
+
+This project is independently maintained by [xTCry](https://github.com/xTCry).
 
 **Features**
 
@@ -27,8 +29,8 @@ This package uses the best of the NodeJS world under the hood. [Telegraf](https:
 ## Installation
 
 ```bash
-$ npm i @xtcry/nestjs-telegraf telegraf
+$ npm i nestjs-telega telegraf
 ```
 
 ## Documentation
-Check out the [documentation site](https://nestjs-telegraf.vercel.app).
+Project documentation is maintained in the [repository](https://github.com/xTCry/nestjs-telega/tree/main/docs).
