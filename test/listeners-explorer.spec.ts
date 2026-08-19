@@ -1,8 +1,12 @@
 import {
   CanActivate,
+  Catch,
+  ExceptionFilter,
   ExecutionContext,
   Injectable,
+  Module,
   PipeTransform,
+  UseFilters,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,16 +18,19 @@ import {
   Telegraf,
   Composer as TelegrafComposer,
   Context as TelegrafContext,
+  Telegram,
 } from 'telegraf';
 
 import {
   Composer as ComposerDecorator,
+  Hears,
   Message,
   Next,
   On,
   Scene,
   SceneEnter,
   SceneLeave,
+  Sender,
   Update,
   Wizard,
   WizardStep,
@@ -398,6 +405,266 @@ describe('ListenersExplorerService', () => {
 
     await moduleRef.close();
   });
+
+  it('limits discovery to explicitly included modules', async () => {
+    const calls: string[] = [];
+
+    @Update()
+    class IncludedUpdateHandler {
+      @On('message')
+      onMessage(): void {
+        calls.push('included');
+      }
+    }
+
+    @Update()
+    class ExcludedUpdateHandler {
+      @On('message')
+      onMessage(): void {
+        calls.push('excluded');
+      }
+    }
+
+    @Module({ providers: [IncludedUpdateHandler] })
+    class IncludedModule {}
+
+    @Module({ providers: [ExcludedUpdateHandler] })
+    class ExcludedModule {}
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: 'test-token',
+          launchOptions: false,
+          include: [IncludedModule],
+        }),
+        IncludedModule,
+        ExcludedModule,
+      ],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    bot.botInfo = getTestBotInfo();
+    await bot.handleUpdate(createTextMessageUpdate(1, 'Hello'));
+
+    expect(calls).toEqual(['included']);
+
+    await moduleRef.close();
+  });
+
+  it('rejects duplicate scene identifiers during discovery', async () => {
+    @Scene('duplicate-scene')
+    class FirstSceneHandler {}
+
+    @Scene('duplicate-scene')
+    class SecondSceneHandler {}
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: 'test-token',
+          launchOptions: false,
+        }),
+      ],
+      providers: [FirstSceneHandler, SecondSceneHandler],
+    }).compile();
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+
+    await expect(moduleRef.init()).rejects.toThrow(
+      'Two scenes with the same id duplicate-scene were detected',
+    );
+  });
+
+  it('registers every chained listener decorator in declaration order', async () => {
+    const calls: string[] = [];
+
+    @Update()
+    class UpdateHandler {
+      @On('message')
+      @Hears('Hello')
+      async onMessage(@Next() next: () => Promise<void>): Promise<void> {
+        calls.push('listener');
+        await next();
+      }
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: 'test-token',
+          launchOptions: false,
+        }),
+      ],
+      providers: [UpdateHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    bot.botInfo = getTestBotInfo();
+    await bot.handleUpdate(createTextMessageUpdate(1, 'Hello'));
+
+    expect(calls).toEqual(['listener', 'listener']);
+
+    await moduleRef.close();
+  });
+
+  it('applies Nest exception filters to update listeners', async () => {
+    const caughtErrors: string[] = [];
+
+    @Catch(Error)
+    @Injectable()
+    class UpdateExceptionFilter implements ExceptionFilter {
+      catch(exception: Error, context: ExecutionContext): boolean {
+        caughtErrors.push(`${context.getType<string>()}:${exception.message}`);
+        return true;
+      }
+    }
+
+    @Update()
+    class UpdateHandler {
+      @On('message')
+      @UseFilters(UpdateExceptionFilter)
+      onMessage(): void {
+        throw new Error('listener failed');
+      }
+    }
+
+    const filterLogger = jest.fn();
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: 'test-token',
+          launchOptions: false,
+          useCatchLogger: filterLogger,
+        }),
+      ],
+      providers: [UpdateExceptionFilter, UpdateHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    bot.botInfo = getTestBotInfo();
+    jest.spyOn(Telegram.prototype, 'callApi').mockResolvedValue({} as never);
+    await expect(
+      bot.handleUpdate(createTextMessageUpdate(1, 'Hello')),
+    ).resolves.toBeUndefined();
+
+    expect(caughtErrors).toEqual(['telegraf:listener failed']);
+    expect(filterLogger).not.toHaveBeenCalled();
+
+    await moduleRef.close();
+  });
+
+  it('forwards next() from scene and wizard listeners', async () => {
+    const calls: string[] = [];
+
+    @Scene('next-scene')
+    class BaseSceneHandler {
+      @On('message')
+      async onMessage(@Next() next: () => Promise<void>): Promise<void> {
+        calls.push('scene');
+        await next();
+      }
+    }
+
+    @Wizard('next-wizard')
+    class WizardSceneHandler {
+      @WizardStep(0)
+      @On('message')
+      async firstStep(@Next() next: () => Promise<void>): Promise<void> {
+        calls.push('wizard');
+        await next();
+      }
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: 'test-token',
+          launchOptions: false,
+        }),
+      ],
+      providers: [BaseSceneHandler, WizardSceneHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    const stage =
+      moduleRef.get<Scenes.Stage<Scenes.WizardContext>>(TELEGRAF_STAGE);
+    const baseScene = stage.scenes.get('next-scene');
+    const wizardScene = stage.scenes.get('next-wizard');
+
+    expect(baseScene).toBeInstanceOf(Scenes.BaseScene);
+    expect(wizardScene).toBeInstanceOf(Scenes.WizardScene);
+    if (
+      !(baseScene instanceof Scenes.BaseScene) ||
+      !(wizardScene instanceof Scenes.WizardScene)
+    ) {
+      throw new Error('Scenes were not registered');
+    }
+
+    const context = createTelegrafContext(bot);
+    let sceneNextCalls = 0;
+    await baseScene.middleware()(
+      context as unknown as Scenes.WizardContext,
+      (): Promise<void> => {
+        sceneNextCalls += 1;
+        return Promise.resolve();
+      },
+    );
+    let wizardNextCalls = 0;
+    await TelegrafComposer.unwrap(wizardScene.steps[0])(
+      context,
+      (): Promise<void> => {
+        wizardNextCalls += 1;
+        return Promise.resolve();
+      },
+    );
+
+    expect(calls).toEqual(['scene', 'wizard']);
+    expect(sceneNextCalls).toBe(1);
+    expect(wizardNextCalls).toBe(1);
+
+    await moduleRef.close();
+  });
+
+  it('extracts sender properties through parameter decorators', async () => {
+    const handleSender = jest.fn();
+
+    @Update()
+    class UpdateHandler {
+      @On('message')
+      onMessage(@Sender('id') senderId: number): void {
+        handleSender(senderId);
+      }
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: 'test-token',
+          launchOptions: false,
+        }),
+      ],
+      providers: [UpdateHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    bot.botInfo = getTestBotInfo();
+    await bot.handleUpdate(createTextMessageUpdate(1, 'Hello'));
+
+    expect(handleSender).toHaveBeenCalledWith(1);
+
+    await moduleRef.close();
+  });
 });
 
 function createTextMessageUpdate(updateId: number, text: string) {
@@ -423,4 +690,12 @@ function getTestBotInfo() {
     can_read_all_group_messages: false,
     supports_inline_queries: false,
   };
+}
+
+function createTelegrafContext(bot: Telegraf): TelegrafContext {
+  return new TelegrafContext(
+    createTextMessageUpdate(1, 'Hello') as TelegrafContext['update'],
+    bot.telegram,
+    getTestBotInfo(),
+  );
 }
