@@ -7,7 +7,7 @@ import {
   Start,
   Update,
   Command,
-} from '@xtcry/nestjs-telegraf';
+} from 'nestjs-telega';
 import { Telegraf } from 'telegraf';
 import { EchoService } from './echo.service';
 import { GreeterBotName } from '../app.constants';

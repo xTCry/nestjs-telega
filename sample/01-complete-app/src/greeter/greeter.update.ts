@@ -6,7 +6,7 @@ import {
   Update,
   Sender,
   On,
-} from '@xtcry/nestjs-telegraf';
+} from 'nestjs-telega';
 import { UpdateType as TelegrafUpdateType } from 'telegraf/typings/telegram-types';
 import { Context } from '../interfaces/context.interface';
 import { HELLO_SCENE_ID, WIZARD_SCENE_ID } from '../app.constants';

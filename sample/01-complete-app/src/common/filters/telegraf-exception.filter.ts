@@ -1,5 +1,5 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
-import { TelegrafArgumentsHost } from '@xtcry/nestjs-telegraf';
+import { TelegrafArgumentsHost } from 'nestjs-telega';
 import { Context } from '../../interfaces/context.interface';
 
 @Catch()

@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import {
   TelegrafExecutionContext,
   TelegrafException,
-} from '@xtcry/nestjs-telegraf';
+} from 'nestjs-telega';
 import { Context } from '../../interfaces/context.interface';
 
 @Injectable()

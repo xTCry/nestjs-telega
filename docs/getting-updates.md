@@ -9,7 +9,7 @@ If you want to configure a telegram bot webhook, you need to get a middleware vi
 
 To access it, you must use the `app.get()` method, followed by the provider reference:
 ```typescript
-import { getBotToken } from 'nestjs-telegraf';
+import { getBotToken } from 'nestjs-telega';
 
 // ...
 const bot = app.get(getBotToken());
