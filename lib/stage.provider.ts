@@ -1,9 +1,12 @@
 import { Provider } from '@nestjs/common';
 import { Scenes } from 'telegraf';
 
-import { TELEGRAF_STAGE } from './telegraf.constants';
+import { getTelegrafStageToken } from './utils';
 
-export const telegrafStageProvider: Provider = {
-  provide: TELEGRAF_STAGE,
+export const createTelegrafStageProvider = (botName?: string): Provider => ({
+  provide: getTelegrafStageToken(botName),
   useClass: Scenes.Stage,
-};
+});
+
+/** @deprecated Использовать createTelegrafStageProvider для named bot instance. */
+export const telegrafStageProvider = createTelegrafStageProvider();

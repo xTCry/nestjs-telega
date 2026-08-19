@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import {
   ModuleRef,
   ModulesContainer,
@@ -30,12 +30,7 @@ import type {
   SceneMetadata,
   TelegrafModuleOptions,
 } from '../interfaces';
-import {
-  PARAM_ARGS_METADATA,
-  TELEGRAF_BOT_NAME,
-  TELEGRAF_MODULE_OPTIONS,
-  TELEGRAF_STAGE,
-} from '../telegraf.constants';
+import { PARAM_ARGS_METADATA } from '../telegraf.constants';
 import type { ComposerMethodArgs } from '../types';
 import { ListenerDecorator } from '../utils';
 
@@ -58,11 +53,8 @@ export class ListenersExplorerService implements OnModuleInit {
     private readonly modulesContainer: ModulesContainer,
     private readonly externalContextCreator: ExternalContextCreator,
 
-    @Inject(TELEGRAF_STAGE)
     private readonly stage: Scenes.Stage<TelegrafSceneContext>,
-    @Inject(TELEGRAF_MODULE_OPTIONS)
     private readonly telegrafOptions: TelegrafModuleOptions,
-    @Inject(TELEGRAF_BOT_NAME)
     private readonly botName: string,
   ) {}
 
