@@ -1,0 +1,25 @@
+# dependencies
+/node_modules
+
+# IDE
+/.idea
+/.awcache
+/.vscode
+
+# misc
+npm-debug.log
+.DS_Store
+
+# tests
+/test
+/coverage
+/.nyc_output
+
+# source
+dist
+
+# docs
+.vitepress/cache
+.vitepress/dist
+docs-api
+
