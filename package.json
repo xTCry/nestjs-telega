@@ -91,7 +91,7 @@
     "globals": "^16.5.0",
     "husky": "9.1.7",
     "jest": "^30.2.0",
-    "lint-staged": "16.2.7",
+    "lint-staged": "17.3.0",
     "prettier": "3.7.4",
     "reflect-metadata": "0.2.2",
     "telegraf": "^4.16.3",
