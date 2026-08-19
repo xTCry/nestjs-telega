@@ -1,7 +1,8 @@
 import { Composer } from 'telegraf';
-import { ComposerMethodArgs, OnlyFunctionPropertyNames } from '../types';
-import { LISTENERS_METADATA } from '../telegraf.constants';
+
 import { ListenerMetadata } from '../interfaces';
+import { LISTENERS_METADATA } from '../telegraf.constants';
+import { ComposerMethodArgs, OnlyFunctionPropertyNames } from '../types';
 
 export function createListenerDecorator<
   TComposer extends Composer<never>,

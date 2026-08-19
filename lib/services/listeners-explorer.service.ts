@@ -1,13 +1,15 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { DiscoveryService, ModuleRef, ModulesContainer } from '@nestjs/core';
-import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
-import { MetadataScanner } from '@nestjs/core/metadata-scanner';
-import { Module } from '@nestjs/core/injector/module';
-import { ParamMetadata } from '@nestjs/core/helpers/interfaces';
 import { ExternalContextCreator } from '@nestjs/core/helpers/external-context-creator';
+import { ParamMetadata } from '@nestjs/core/helpers/interfaces';
+import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
+import { Module } from '@nestjs/core/injector/module';
+import { MetadataScanner } from '@nestjs/core/metadata-scanner';
 import { Composer, Context, MiddlewareFn, Scenes, Telegraf } from 'telegraf';
 
-import { MetadataAccessorService } from './metadata-accessor.service';
+import { TelegrafContextType } from '../execution-context';
+import { TelegrafParamsFactory } from '../factories/telegraf-params-factory';
+import { ListenerMetadata, TelegrafModuleOptions } from '../interfaces';
 import {
   PARAM_ARGS_METADATA,
   TELEGRAF_BOT_NAME,
@@ -15,9 +17,7 @@ import {
   TELEGRAF_STAGE,
 } from '../telegraf.constants';
 import { BaseExplorerService } from './base-explorer.service';
-import { TelegrafParamsFactory } from '../factories/telegraf-params-factory';
-import { TelegrafContextType } from '../execution-context';
-import { ListenerMetadata, TelegrafModuleOptions } from '../interfaces';
+import { MetadataAccessorService } from './metadata-accessor.service';
 
 @Injectable()
 export class ListenersExplorerService

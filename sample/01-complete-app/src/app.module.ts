@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TelegrafModule } from 'nestjs-telega';
+
+import { GreeterBotName } from './app.constants';
 import { EchoModule } from './echo/echo.module';
 import { GreeterModule } from './greeter/greeter.module';
 import { sessionMiddleware } from './middleware/session.middleware';
-import { GreeterBotName } from './app.constants';
 
 @Module({
   imports: [

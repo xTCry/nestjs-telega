@@ -1,21 +1,22 @@
 import { UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
 import {
+  Command,
   Help,
   InjectBot,
-  On,
   Message,
+  On,
   Start,
   Update,
-  Command,
 } from 'nestjs-telega';
 import { Telegraf } from 'telegraf';
-import { EchoService } from './echo.service';
+
 import { GreeterBotName } from '../app.constants';
-import { Context } from '../interfaces/context.interface';
-import { ReverseTextPipe } from '../common/pipes/reverse-text.pipe';
-import { ResponseTimeInterceptor } from '../common/interceptors/response-time.interceptor';
-import { AdminGuard } from '../common/guards/admin.guard';
 import { TelegrafExceptionFilter } from '../common/filters/telegraf-exception.filter';
+import { AdminGuard } from '../common/guards/admin.guard';
+import { ResponseTimeInterceptor } from '../common/interceptors/response-time.interceptor';
+import { ReverseTextPipe } from '../common/pipes/reverse-text.pipe';
+import { Context } from '../interfaces/context.interface';
+import { EchoService } from './echo.service';
 
 @Update()
 @UseInterceptors(ResponseTimeInterceptor)

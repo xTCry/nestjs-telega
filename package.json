@@ -43,8 +43,8 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
-    "format": "prettier --write \"lib/**/*.ts\" \"test/**/*.ts\"",
-    "format:check": "prettier --check \"lib/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"lib/**/*.ts\" \"test/**/*.ts\" \"scripts/**/*.js\"",
+    "format:check": "prettier --check \"lib/**/*.ts\" \"test/**/*.ts\" \"scripts/**/*.js\"",
     "format:sample": "prettier --config .prettierrc --write \"sample/*/src/**/*.ts\"",
     "copy-to-sample": "node scripts/copy-to-sample.js",
     "postbuild": "npm run copy-to-sample",
@@ -81,6 +81,7 @@
     "@nestjs/common": "^11.1.0",
     "@nestjs/core": "^11.1.0",
     "@nestjs/testing": "^11.1.0",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.13.3",
     "@typescript-eslint/eslint-plugin": "8.50.0",

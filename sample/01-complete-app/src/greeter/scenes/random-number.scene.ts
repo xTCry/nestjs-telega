@@ -1,4 +1,5 @@
-import { Scene, SceneEnter, SceneLeave, Command } from 'nestjs-telega';
+import { Command, Scene, SceneEnter, SceneLeave } from 'nestjs-telega';
+
 import { HELLO_SCENE_ID } from '../../app.constants';
 import { Context } from '../../interfaces/context.interface';
 

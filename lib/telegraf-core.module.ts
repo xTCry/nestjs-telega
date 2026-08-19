@@ -1,4 +1,3 @@
-import { DiscoveryModule, ModuleRef } from '@nestjs/core';
 import {
   DynamicModule,
   Global,
@@ -8,21 +7,23 @@ import {
   Provider,
   Type,
 } from '@nestjs/common';
+import { DiscoveryModule, ModuleRef } from '@nestjs/core';
+
 import {
   TelegrafModuleAsyncOptions,
   TelegrafModuleOptions,
   TelegrafOptionsFactory,
 } from './interfaces';
-import {
-  TELEGRAF_BOT_NAME,
-  TELEGRAF_MODULE_OPTIONS,
-} from './telegraf.constants';
 import { ListenersExplorerService, MetadataAccessorService } from './services';
 import { telegrafStageProvider } from './stage.provider';
 import {
   allBotsMap,
   telegrafAllBotsProvider,
 } from './telegraf-all-bots.provider';
+import {
+  TELEGRAF_BOT_NAME,
+  TELEGRAF_MODULE_OPTIONS,
+} from './telegraf.constants';
 import { createBotFactory, getBotToken } from './utils';
 
 @Global()

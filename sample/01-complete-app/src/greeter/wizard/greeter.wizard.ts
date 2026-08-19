@@ -1,6 +1,7 @@
 import { Ctx, Message, On, Wizard, WizardStep } from 'nestjs-telega';
-import { WIZARD_SCENE_ID } from '../../app.constants';
 import { WizardContext } from 'telegraf/typings/scenes';
+
+import { WIZARD_SCENE_ID } from '../../app.constants';
 
 @Wizard(WIZARD_SCENE_ID)
 export class GreeterWizard {

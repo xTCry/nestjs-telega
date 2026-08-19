@@ -1,4 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
+
 import { SCENE_LEAVE_METADATA } from '../../telegraf.constants';
 
 /** Помечает метод как обработчик выхода из сцены. */

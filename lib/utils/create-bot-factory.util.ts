@@ -1,6 +1,7 @@
-import { Telegraf } from 'telegraf';
-import { TelegrafModuleOptions } from '../interfaces';
 import { Logger } from '@nestjs/common';
+import { Telegraf } from 'telegraf';
+
+import { TelegrafModuleOptions } from '../interfaces';
 
 export function createBotFactory(
   options: TelegrafModuleOptions,

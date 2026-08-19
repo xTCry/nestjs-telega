@@ -1,19 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import {
-  SCENE_METADATA,
-  SCENE_ENTER_METADATA,
-  SCENE_LEAVE_METADATA,
-  LISTENERS_METADATA,
-  UPDATE_METADATA,
-  WIZARD_STEP_METADATA,
-  COMPOSER_METADATA,
-} from '../telegraf.constants';
+
 import {
   ListenerMetadata,
   SceneMetadata,
   WizardStepMetadata,
 } from '../interfaces';
+import {
+  COMPOSER_METADATA,
+  LISTENERS_METADATA,
+  SCENE_ENTER_METADATA,
+  SCENE_LEAVE_METADATA,
+  SCENE_METADATA,
+  UPDATE_METADATA,
+  WIZARD_STEP_METADATA,
+} from '../telegraf.constants';
 
 @Injectable()
 export class MetadataAccessorService {

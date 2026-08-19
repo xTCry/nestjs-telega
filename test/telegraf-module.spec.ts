@@ -1,5 +1,5 @@
-import { Telegraf } from 'telegraf';
 import { Test } from '@nestjs/testing';
+import { Telegraf } from 'telegraf';
 
 import { allBotsMap } from '../lib/telegraf-all-bots.provider';
 import { TelegrafModule } from '../lib/telegraf.module';

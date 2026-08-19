@@ -1,16 +1,9 @@
-import {
-  Command,
-  Ctx,
-  Hears,
-  Start,
-  Update,
-  Sender,
-  On,
-} from 'nestjs-telega';
+import { Command, Ctx, Hears, On, Sender, Start, Update } from 'nestjs-telega';
 import { UpdateType as TelegrafUpdateType } from 'telegraf/typings/telegram-types';
-import { Context } from '../interfaces/context.interface';
+
 import { HELLO_SCENE_ID, WIZARD_SCENE_ID } from '../app.constants';
 import { UpdateType } from '../common/decorators/update-type.decorator';
+import { Context } from '../interfaces/context.interface';
 
 @Update()
 export class GreeterUpdate {

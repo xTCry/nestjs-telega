@@ -1,9 +1,10 @@
-import { Module, DynamicModule } from '@nestjs/common';
-import { TelegrafCoreModule } from './telegraf-core.module';
+import { DynamicModule, Module } from '@nestjs/common';
+
 import {
-  TelegrafModuleOptions,
   TelegrafModuleAsyncOptions,
+  TelegrafModuleOptions,
 } from './interfaces';
+import { TelegrafCoreModule } from './telegraf-core.module';
 
 @Module({})
 export class TelegrafModule {
