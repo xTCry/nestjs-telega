@@ -5,4 +5,7 @@ import { ListenerDecorator } from '../../utils';
  *
  * @see https://telegraf.js.org/#/?id=telegraf-email
  */
-export const Email = ListenerDecorator('email');
+export const TgEmail = ListenerDecorator('email');
+
+/** Alias for {@link TgEmail}. */
+export const Email = TgEmail;

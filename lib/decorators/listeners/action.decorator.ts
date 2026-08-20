@@ -5,4 +5,7 @@ import { ListenerDecorator } from '../../utils';
  *
  * @see https://telegraf.js.org/#/?id=action
  */
-export const Action = ListenerDecorator('action');
+export const TgAction = ListenerDecorator('action');
+
+/** Alias for {@link TgAction}. */
+export const Action = TgAction;

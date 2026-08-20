@@ -13,7 +13,10 @@ export type SceneDecorator = (
   options?: SceneOptions<Context>,
 ) => ClassDecorator;
 
-export const Scene: SceneDecorator = (
+export const TgScene: SceneDecorator = (
   sceneId: string,
   options?: SceneOptions<Context>,
 ): ClassDecorator => SceneMetadataDecorator({ sceneId, type: 'base', options });
+
+/** Alias for {@link TgScene}. */
+export const Scene = TgScene;

@@ -5,4 +5,7 @@ import { ListenerDecorator } from '../../utils';
  *
  * @see https://telegraf.js.org/#/?id=cashtag
  */
-export const Cashtag = ListenerDecorator('cashtag');
+export const TgCashtag = ListenerDecorator('cashtag');
+
+/** Alias for {@link TgCashtag}. */
+export const Cashtag = TgCashtag;

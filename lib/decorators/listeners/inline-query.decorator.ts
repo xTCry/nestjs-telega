@@ -5,4 +5,7 @@ import { ListenerDecorator } from '../../utils';
  *
  * @see https://telegraf.js.org/#/?id=inlinequery
  */
-export const InlineQuery = ListenerDecorator('inlineQuery');
+export const TgInlineQuery = ListenerDecorator('inlineQuery');
+
+/** Alias for {@link TgInlineQuery}. */
+export const InlineQuery = TgInlineQuery;

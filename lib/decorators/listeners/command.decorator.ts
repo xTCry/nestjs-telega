@@ -5,4 +5,7 @@ import { ListenerDecorator } from '../../utils';
  *
  * @see https://telegraf.js.org/#/?id=command
  */
-export const Command = ListenerDecorator('command');
+export const TgCommand = ListenerDecorator('command');
+
+/** Alias for {@link TgCommand}. */
+export const Command = TgCommand;

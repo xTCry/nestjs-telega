@@ -5,5 +5,8 @@ import { getAllBotsToken } from '../../utils/get-all-bots-token.util';
 
 export type AllBotsMap = Map<string, Telegraf<Context>>;
 
-export const InjectAllBots = (): ReturnType<typeof Inject> =>
+export const TgInjectAllBots = (): ReturnType<typeof Inject> =>
   Inject(getAllBotsToken());
+
+/** Alias for {@link TgInjectAllBots}. */
+export const InjectAllBots = TgInjectAllBots;

@@ -5,4 +5,7 @@ import { ListenerDecorator } from '../../utils';
  *
  * @see https://telegraf.js.org/#/?id=settings
  */
-export const Settings = ListenerDecorator('settings');
+export const TgSettings = ListenerDecorator('settings');
+
+/** Alias for {@link TgSettings}. */
+export const Settings = TgSettings;

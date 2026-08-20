@@ -5,4 +5,7 @@ import { ListenerDecorator } from '../../utils';
  *
  * @see https://telegraf.js.org/#/?id=mention
  */
-export const Mention = ListenerDecorator('mention');
+export const TgMention = ListenerDecorator('mention');
+
+/** Alias for {@link TgMention}. */
+export const Mention = TgMention;

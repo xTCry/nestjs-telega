@@ -11,6 +11,10 @@ import {
   SceneEnter,
   SceneLeave,
   SceneMetadataDecorator,
+  TgHears,
+  TgOn,
+  TgUpdate,
+  Update,
   Use,
   Wizard,
   WizardStep,
@@ -67,6 +71,26 @@ describe('public decorators', () => {
       { method: 'on', args: ['message'] },
       { method: 'hears', args: ['/start'] },
       { method: 'use', args: [] },
+    ]);
+  });
+
+  it('exports Tg aliases that preserve decorator metadata', () => {
+    @TgUpdate()
+    class UpdateHandler {
+      @TgOn('message')
+      @TgHears('Hello')
+      handle(): void {}
+    }
+
+    const descriptor = getMethodDescriptor(UpdateHandler.prototype, 'handle');
+    const reflector = new Reflector();
+
+    expect(reflector.get(Update, UpdateHandler)).toEqual({});
+    expect(
+      reflector.get(ListenerDecorator, descriptor.value) as ListenerMetadata[],
+    ).toEqual([
+      { method: 'hears', args: ['Hello'] },
+      { method: 'on', args: ['message'] },
     ]);
   });
 

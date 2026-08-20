@@ -8,6 +8,9 @@ export const WizardStepMetadataDecorator =
 
 type WizardStepDecorator = (step: number) => MethodDecorator;
 
-export const WizardStep: WizardStepDecorator = (
+export const TgWizardStep: WizardStepDecorator = (
   step: number,
 ): MethodDecorator => WizardStepMetadataDecorator({ step });
+
+/** Alias for {@link TgWizardStep}. */
+export const WizardStep = TgWizardStep;
