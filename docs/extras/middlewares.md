@@ -1,7 +1,14 @@
 # Middlewares
-`nestjs-telega` has support of the Telegraf middleware packages. To use an existing middleware package, simply import it and add it to the middlewares array:
+
+`nestjs-telega` supports Telegraf middleware packages. Middleware run in this
+order: `middlewaresBefore` (or the legacy `middlewares` alias),
+stage/composer handlers, update handlers, then `middlewaresAfter`.
+
+To use an existing middleware package before handlers, add it to
+`middlewaresBefore`:
+
 ```typescript
 TelegrafModule.forRoot({
-  middlewares: [session()],  
+  middlewaresBefore: [session()],
 }),
 ```

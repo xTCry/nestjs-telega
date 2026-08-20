@@ -247,6 +247,61 @@ describe('ListenersExplorerService', () => {
     await moduleRef.close();
   });
 
+  it('runs before, stage, update and after middlewares in order', async () => {
+    const calls: string[] = [];
+
+    @ComposerDecorator()
+    class ComposerHandler {
+      @On('message')
+      async onMessage(@Next() next: () => Promise<void>): Promise<void> {
+        calls.push('composer');
+        await next();
+      }
+    }
+
+    @Update()
+    class UpdateHandler {
+      @On('message')
+      async onMessage(@Next() next: () => Promise<void>): Promise<void> {
+        calls.push('update');
+        await next();
+      }
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: 'test-token',
+          launchOptions: false,
+          middlewaresBefore: [
+            async (_context, next): Promise<void> => {
+              calls.push('before');
+              await next();
+            },
+            session(),
+          ],
+          middlewaresAfter: [
+            async (_context, next): Promise<void> => {
+              calls.push('after');
+              await next();
+            },
+          ],
+        }),
+      ],
+      providers: [ComposerHandler, UpdateHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    bot.botInfo = getTestBotInfo();
+    await bot.handleUpdate(createTextMessageUpdate(1, 'Hello'));
+
+    expect(calls).toEqual(['before', 'composer', 'update', 'after']);
+
+    await moduleRef.close();
+  });
+
   it('registers wizard steps in their numeric order', async () => {
     const calls: string[] = [];
 

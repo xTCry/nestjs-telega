@@ -25,6 +25,24 @@ describe('createBotFactory', () => {
     stopBot(bot);
   });
 
+  it('prefers middlewaresBefore over the deprecated middlewares alias', async () => {
+    const beforeMiddleware = jest.fn();
+    const legacyMiddleware = jest.fn();
+    const use = jest.spyOn(Telegraf.prototype, 'use');
+
+    const bot = await createBotFactory({
+      token: 'test-token',
+      launchOptions: false,
+      middlewaresBefore: [beforeMiddleware],
+      middlewares: [legacyMiddleware],
+    });
+
+    expect(use).toHaveBeenCalledWith(beforeMiddleware);
+    expect(use).not.toHaveBeenCalledWith(legacyMiddleware);
+
+    stopBot(bot);
+  });
+
   it('does not register an error handler when logging is disabled', async () => {
     const catchHandler = jest.spyOn(Telegraf.prototype, 'catch');
 

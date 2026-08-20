@@ -8,7 +8,7 @@ export function createBotFactory(
 ): Promise<Telegraf<Context>> {
   const bot = new Telegraf<Context>(options.token, options.options);
 
-  bot.use(...(options.middlewares ?? []));
+  bot.use(...(options.middlewaresBefore ?? options.middlewares ?? []));
   if (options.useCatchLogger !== false) {
     bot.catch((err, ctx) => {
       const error = err instanceof Error ? err : new Error(String(err));
