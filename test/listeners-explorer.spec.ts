@@ -23,6 +23,7 @@ import {
 
 import {
   Composer as ComposerDecorator,
+  Ctx,
   Hears,
   Message,
   Next,
@@ -593,8 +594,65 @@ describe('ListenersExplorerService', () => {
     jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
 
     await expect(moduleRef.init()).rejects.toThrow(
-      'Two scenes with the same id duplicate-scene were detected',
+      'Duplicate scene id "duplicate-scene" for bot "DEFAULT_BOT_NAME": ' +
+        'FirstSceneHandler conflicts with SecondSceneHandler',
     );
+  });
+
+  it('does not register wizard lifecycle methods as wizard steps', async () => {
+    const calls: string[] = [];
+
+    @Wizard('lifecycle-wizard')
+    class WizardSceneHandler {
+      @SceneEnter()
+      @WizardStep(0)
+      onEnter(): void {
+        calls.push('enter');
+      }
+
+      @WizardStep(0)
+      @On('message')
+      firstStep(): void {
+        calls.push('step');
+      }
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: 'test-token',
+          launchOptions: false,
+        }),
+      ],
+      providers: [WizardSceneHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    const stage =
+      moduleRef.get<Scenes.Stage<Scenes.WizardContext>>(TELEGRAF_STAGE);
+    const scene = stage.scenes.get('lifecycle-wizard');
+
+    expect(scene).toBeInstanceOf(Scenes.WizardScene);
+    if (!(scene instanceof Scenes.WizardScene)) {
+      throw new Error('Wizard scene was not registered');
+    }
+    expect(scene.steps).toHaveLength(1);
+
+    const context = createTelegrafContext(bot);
+    await scene.enterHandler(
+      context as unknown as Scenes.WizardContext,
+      (): Promise<void> => Promise.resolve(),
+    );
+    await TelegrafComposer.unwrap(scene.steps[0])(
+      context,
+      (): Promise<void> => Promise.resolve(),
+    );
+
+    expect(calls).toEqual(['enter', 'step']);
+
+    await moduleRef.close();
   });
 
   it('registers every chained listener decorator in declaration order', async () => {
@@ -749,6 +807,73 @@ describe('ListenersExplorerService', () => {
     expect(calls).toEqual(['scene', 'wizard']);
     expect(sceneNextCalls).toBe(1);
     expect(wizardNextCalls).toBe(1);
+
+    await moduleRef.close();
+  });
+
+  it('runs active scene handlers between composer and update handlers', async () => {
+    const calls: string[] = [];
+
+    @ComposerDecorator()
+    class ComposerHandler {
+      @On('message')
+      async onMessage(@Next() next: () => Promise<void>): Promise<void> {
+        calls.push('composer');
+        await next();
+      }
+    }
+
+    @Scene('ordered-scene')
+    class OrderedScene {
+      @On('message')
+      async onMessage(@Next() next: () => Promise<void>): Promise<void> {
+        calls.push('scene');
+        await next();
+      }
+    }
+
+    @Update()
+    class UpdateHandler {
+      @Hears('enter')
+      async enterScene(@Ctx() ctx: Scenes.WizardContext): Promise<void> {
+        calls.push('enter');
+        await ctx.scene.enter('ordered-scene');
+      }
+
+      @On('message')
+      async onMessage(@Next() next: () => Promise<void>): Promise<void> {
+        calls.push('update');
+        await next();
+      }
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: 'test-token',
+          launchOptions: false,
+          middlewaresBefore: [session()],
+          middlewaresAfter: [
+            async (_context, next): Promise<void> => {
+              calls.push('after');
+              await next();
+            },
+          ],
+        }),
+      ],
+      providers: [ComposerHandler, OrderedScene, UpdateHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    bot.botInfo = getTestBotInfo();
+    await bot.handleUpdate(createTextMessageUpdate(1, 'enter'));
+    calls.length = 0;
+
+    await bot.handleUpdate(createTextMessageUpdate(2, 'Hello'));
+
+    expect(calls).toEqual(['composer', 'scene', 'update', 'after']);
 
     await moduleRef.close();
   });

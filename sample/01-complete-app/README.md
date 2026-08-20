@@ -3,7 +3,9 @@
 Пример запускает два независимых Telegraf-бота:
 
 - default bot: echo, `@ReplyOptions` и object listener result;
-- named `greeter` bot: session middleware, scenes, wizard и inline query.
+- named `greeter` bot: session middleware, scenes, wizard и inline query;
+- named `notifier` bot: `@InjectBot()` и `@InjectAllBots()` в
+  multi-bot configuration.
 
 ## Локальная проверка
 

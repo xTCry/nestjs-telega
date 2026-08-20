@@ -49,6 +49,7 @@ export class ListenersExplorerService implements OnModuleInit {
       reflector,
       metadataScanner,
       this.createReplyingListener.bind(this) as TelegrafListenerFactory,
+      botName,
     );
   }
 

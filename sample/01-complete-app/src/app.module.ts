@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TelegrafModule } from 'nestjs-telega';
 
-import { GreeterBotName } from './app.constants';
+import { GreeterBotName, NotifierBotName } from './app.constants';
 import { EchoModule } from './echo/echo.module';
 import { GreeterModule } from './greeter/greeter.module';
 import { sessionMiddleware } from './middleware/session.middleware';
+import { NotifierModule } from './notifier/notifier.module';
 
 @Module({
   imports: [
@@ -20,8 +21,16 @@ import { sessionMiddleware } from './middleware/session.middleware';
         include: [GreeterModule],
       }),
     }),
+    TelegrafModule.forRootAsync({
+      botName: NotifierBotName,
+      useFactory: () => ({
+        token: process.env.NOTIFIER_BOT_TOKEN,
+        include: [NotifierModule],
+      }),
+    }),
     EchoModule,
     GreeterModule,
+    NotifierModule,
   ],
 })
 export class AppModule {}

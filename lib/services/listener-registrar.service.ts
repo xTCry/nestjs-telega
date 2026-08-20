@@ -37,6 +37,7 @@ export class ListenerRegistrarService {
     private readonly reflector: Reflector,
     private readonly metadataScanner: MetadataScanner,
     private readonly createListener: TelegrafListenerFactory,
+    private readonly botName: string,
   ) {}
 
   public registerBeforeStage(
@@ -89,7 +90,7 @@ export class ListenerRegistrarService {
     wrappers: InstanceWrapper<object>[],
     stage: Scenes.Stage<TelegrafSceneContext>,
   ): void {
-    const sceneIds = new Set<string>();
+    const sceneClasses = new Map<string, string>();
 
     for (const wrapper of wrappers) {
       const metadata = this.getSceneMetadata(wrapper);
@@ -98,10 +99,14 @@ export class ListenerRegistrarService {
       }
 
       const { sceneId, type, options } = metadata;
-      if (sceneIds.has(sceneId)) {
-        throw new Error(`Two scenes with the same id ${sceneId} were detected`);
+      const firstSceneClass = sceneClasses.get(sceneId);
+      if (firstSceneClass) {
+        throw new Error(
+          `Duplicate scene id "${sceneId}" for bot "${this.botName}": ` +
+            `${firstSceneClass} conflicts with ${this.getClassName(wrapper)}`,
+        );
       }
-      sceneIds.add(sceneId);
+      sceneClasses.set(sceneId, this.getClassName(wrapper));
 
       const scene =
         type === 'base'
@@ -204,12 +209,16 @@ export class ListenerRegistrarService {
       prototype,
     )) {
       const methodRef = prototype[methodName];
+      const isLifecycleListener =
+        this.reflector.get(SceneEnter, methodRef) !== undefined ||
+        this.reflector.get(SceneLeave, methodRef) !== undefined;
       const metadata = this.reflector.get(
         WizardStepMetadataDecorator,
         methodRef,
       );
 
-      if (metadata) {
+      // Lifecycle methods run only through scene.enter/leave, never as wizard steps.
+      if (metadata && !isLifecycleListener) {
         steps.push({ step: metadata.step, methodName });
       } else {
         regularListeners.push(methodName);
@@ -288,5 +297,9 @@ export class ListenerRegistrarService {
     return prototype && typeof prototype === 'object'
       ? (prototype as TelegrafPrototype)
       : undefined;
+  }
+
+  private getClassName(wrapper: InstanceWrapper<object>): string {
+    return wrapper.metatype?.name ?? 'AnonymousScene';
   }
 }
