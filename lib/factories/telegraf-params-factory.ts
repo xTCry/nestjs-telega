@@ -1,6 +1,6 @@
 import { ParamData } from '@nestjs/common';
 import { ParamsFactory } from '@nestjs/core/helpers/external-context-creator';
-import { Context } from 'telegraf';
+import type { Context, MiddlewareFn } from 'telegraf';
 
 import { TelegrafParamtype } from '../enums/telegraf-paramtype.enum';
 
@@ -10,8 +10,10 @@ export class TelegrafParamsFactory implements ParamsFactory {
     data: ParamData,
     args: unknown[],
   ): unknown {
-    const ctx = args[0] as Context;
-    const next = args[1] as Function;
+    const [ctx, next] = args as [
+      Context | undefined,
+      MiddlewareFn<Context> | undefined,
+    ];
 
     switch (type) {
       case TelegrafParamtype.CONTEXT:
@@ -19,9 +21,9 @@ export class TelegrafParamsFactory implements ParamsFactory {
       case TelegrafParamtype.NEXT:
         return next;
       case TelegrafParamtype.SENDER:
-        return getContextProperty(ctx.from, data);
+        return getContextProperty(ctx?.from, data);
       case TelegrafParamtype.MESSAGE:
-        return getContextProperty(ctx.message, data);
+        return getContextProperty(ctx?.message, data);
       default:
         return null;
     }
