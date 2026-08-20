@@ -16,7 +16,7 @@ import { sessionMiddleware } from './middleware/session.middleware';
       botName: GreeterBotName,
       useFactory: () => ({
         token: process.env.GREETER_BOT_TOKEN,
-        middlewares: [sessionMiddleware],
+        middlewaresBefore: [sessionMiddleware],
         include: [GreeterModule],
       }),
     }),

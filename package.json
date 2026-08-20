@@ -1,6 +1,6 @@
 {
   "name": "nestjs-telega",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Telegram bot module for NestJS",
   "keywords": [
     "nest",
