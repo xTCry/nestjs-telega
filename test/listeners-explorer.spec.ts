@@ -27,6 +27,7 @@ import {
   Message,
   Next,
   On,
+  ReplyOptions,
   Scene,
   SceneEnter,
   SceneLeave,
@@ -40,6 +41,69 @@ import { TelegrafModule } from '../lib/telegraf.module';
 import { getBotToken } from '../lib/utils';
 
 describe('ListenersExplorerService', () => {
+  it('applies module, class and method reply options to listener results', async () => {
+    @ReplyOptions({ parse_mode: 'HTML', disable_notification: true })
+    @Update()
+    class UpdateHandler {
+      @ReplyOptions({ disable_notification: false })
+      @On('message')
+      onMessage() {
+        return {
+          text: 'Hello',
+          extra: { parse_mode: 'MarkdownV2' },
+        };
+      }
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: 'test-token',
+          launchOptions: false,
+          replyOptions: { link_preview_options: { is_disabled: true } },
+        }),
+      ],
+      providers: [UpdateHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    const callApi = jest
+      .spyOn(Telegram.prototype, 'callApi')
+      .mockResolvedValue({ message_id: 1 } as never);
+    bot.botInfo = {
+      first_name: 'Test bot',
+      id: 1,
+      is_bot: true,
+      username: 'test_bot',
+      can_join_groups: true,
+      can_read_all_group_messages: false,
+      supports_inline_queries: false,
+    };
+
+    await bot.handleUpdate({
+      update_id: 1,
+      message: {
+        chat: { first_name: 'Test', id: 1, type: 'private' },
+        date: 0,
+        from: { first_name: 'Test', id: 1, is_bot: false },
+        message_id: 1,
+        text: 'Hello',
+      },
+    });
+
+    expect(callApi).toHaveBeenCalledWith('sendMessage', {
+      chat_id: 1,
+      text: 'Hello',
+      parse_mode: 'MarkdownV2',
+      disable_notification: false,
+      link_preview_options: { is_disabled: true },
+    });
+
+    await moduleRef.close();
+  });
+
   it('discovers and registers an update listener', async () => {
     const handleMessage = jest.fn();
 

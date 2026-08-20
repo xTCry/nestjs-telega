@@ -5,6 +5,8 @@ import type {
 } from '@nestjs/common/interfaces';
 import type { Context, Middleware, Telegraf } from 'telegraf';
 
+import type { TelegrafReplyExtra } from './telegraf-listener-result.interface';
+
 export interface TelegrafModuleOptions {
   token: string;
   botName?: string;
@@ -12,6 +14,7 @@ export interface TelegrafModuleOptions {
   launchOptions?: Telegraf.LaunchOptions | false;
   include?: Function[];
   middlewares?: ReadonlyArray<Middleware<Context>>;
+  replyOptions?: TelegrafReplyExtra;
   useCatchLogger?: ((err: Error, ctx?: Context) => void) | false;
 }
 

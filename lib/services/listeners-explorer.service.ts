@@ -16,6 +16,7 @@ import type { SceneOptions } from 'telegraf/typings/scenes/base';
 import {
   Composer as ComposerDecorator,
   SceneMetadataDecorator,
+  TelegrafReplyOptions as TelegrafReplyOptionsDecorator,
   Update,
 } from '../decorators/core';
 import {
@@ -28,11 +29,13 @@ import { TelegrafParamsFactory } from '../factories/telegraf-params-factory';
 import type {
   ListenerMetadata,
   SceneMetadata,
+  TelegrafListenerResult,
   TelegrafModuleOptions,
+  TelegrafReplyExtra,
 } from '../interfaces';
 import { PARAM_ARGS_METADATA } from '../telegraf.constants';
 import type { ComposerMethodArgs } from '../types';
-import { ListenerDecorator } from '../utils';
+import { applyListenerResult, ListenerDecorator } from '../utils';
 
 type TelegrafMethod = (...args: unknown[]) => unknown;
 type TelegrafPrototype = Record<string, TelegrafMethod>;
@@ -85,6 +88,7 @@ export class ListenersExplorerService implements OnModuleInit {
     decorator: ReflectableDecorator<never, unknown>,
   ): InstanceWrapper<object>[] {
     const providers: InstanceWrapper<object>[] = [];
+    const metatypes = new Set<Function>();
 
     for (const moduleRef of modules) {
       for (const wrapper of moduleRef.providers.values()) {
@@ -92,10 +96,15 @@ export class ListenersExplorerService implements OnModuleInit {
           continue;
         }
 
+        if (metatypes.has(wrapper.metatype)) {
+          continue;
+        }
+
         if (!this.reflector.get(decorator, wrapper.metatype)) {
           continue;
         }
 
+        metatypes.add(wrapper.metatype);
         providers.push(wrapper as InstanceWrapper<object>);
       }
     }
@@ -339,20 +348,35 @@ export class ListenersExplorerService implements OnModuleInit {
     prototype: TelegrafPrototype,
     methodName: string,
   ): TelegrafListenerCallback | undefined {
+    const methodRef = prototype[methodName];
     const callback = this.createContextCallback(
       instance,
       prototype,
       methodName,
     );
-    if (!callback) {
+    if (!callback || typeof methodRef !== 'function') {
       return undefined;
     }
 
+    const replyOptions = this.getMergedReplyOptions(instance, methodRef);
+
     return async (ctx, next): Promise<void> => {
-      const result = await callback(ctx, next);
-      if (result) {
-        await ctx.reply(String(result));
-      }
+      const result = (await callback(ctx, next)) as TelegrafListenerResult;
+      await applyListenerResult(ctx, result, replyOptions);
+    };
+  }
+
+  /** Объединяет module-, class- и method-level параметры ответа. */
+  private getMergedReplyOptions(
+    instance: object,
+    methodRef: TelegrafMethod,
+  ): TelegrafReplyExtra {
+    return {
+      ...this.telegrafOptions.replyOptions,
+      ...this.reflector.getAllAndMerge<TelegrafReplyExtra>(
+        TelegrafReplyOptionsDecorator,
+        [instance.constructor, methodRef],
+      ),
     };
   }
 

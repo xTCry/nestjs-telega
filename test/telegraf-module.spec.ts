@@ -297,6 +297,68 @@ describe('TelegrafModule', () => {
     await moduleRef.close();
   });
 
+  it('does not register a re-exported update provider twice for one bot', async () => {
+    const handler = jest.fn();
+
+    @Update()
+    class SharedUpdate {
+      @On('message')
+      onMessage(): void {
+        handler();
+      }
+    }
+
+    @Module({
+      providers: [SharedUpdate],
+      exports: [SharedUpdate],
+    })
+    class SharedUpdatesModule {}
+
+    @Module({
+      imports: [SharedUpdatesModule],
+      exports: [SharedUpdatesModule],
+    })
+    class ReExportedUpdatesModule {}
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        SharedUpdatesModule,
+        ReExportedUpdatesModule,
+        TelegrafModule.forRoot({
+          token: 'test-token',
+          launchOptions: false,
+          include: [SharedUpdatesModule, ReExportedUpdatesModule],
+        }),
+      ],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    bot.botInfo = {
+      first_name: 'Test bot',
+      id: 1,
+      is_bot: true,
+      username: 'test_bot',
+      can_join_groups: true,
+      can_read_all_group_messages: false,
+      supports_inline_queries: false,
+    };
+    await bot.handleUpdate({
+      update_id: 1,
+      message: {
+        chat: { first_name: 'Test', id: 1, type: 'private' },
+        date: 0,
+        from: { first_name: 'Test', id: 1, is_bot: false },
+        message_id: 1,
+        text: 'Hello',
+      },
+    });
+
+    expect(handler).toHaveBeenCalledTimes(1);
+
+    await moduleRef.close();
+  });
+
   it('registers included update handlers only for their bot', async () => {
     const botName = 'reminder';
     const defaultHandler = jest.fn();
