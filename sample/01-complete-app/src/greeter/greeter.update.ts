@@ -1,5 +1,15 @@
-import { Command, Ctx, Hears, On, Sender, Start, Update } from 'nestjs-telega';
-import { UpdateType as TelegrafUpdateType } from 'telegraf/typings/telegram-types';
+import {
+  Command,
+  Ctx,
+  Hears,
+  InlineQuery,
+  On,
+  Sender,
+  Start,
+  TelegrafListenerResult,
+  Update,
+} from 'nestjs-telega';
+import type { UpdateType as TelegrafUpdateType } from 'telegraf/typings/telegram-types';
 
 import { HELLO_SCENE_ID, WIZARD_SCENE_ID } from '../app.constants';
 import { UpdateType } from '../common/decorators/update-type.decorator';
@@ -16,22 +26,42 @@ export class GreeterUpdate {
   onGreetings(
     @UpdateType() updateType: TelegrafUpdateType,
     @Sender('first_name') firstName: string,
-  ): string {
+  ): TelegrafListenerResult {
     return `Hey ${firstName}`;
   }
 
   @Command('scene')
-  async onSceneCommand(@Ctx() ctx: Context): Promise<void> {
+  async onSceneCommand(@Ctx() ctx: Context): Promise<TelegrafListenerResult> {
     await ctx.scene.enter(HELLO_SCENE_ID);
   }
 
   @Command('wizard')
-  async onWizardCommand(@Ctx() ctx: Context): Promise<void> {
+  async onWizardCommand(@Ctx() ctx: Context): Promise<TelegrafListenerResult> {
     await ctx.scene.enter(WIZARD_SCENE_ID);
   }
 
   @On('message_reaction')
   async onOn(@Ctx() ctx: Context) {
-    ctx.reply(`Reaction received: ${JSON.stringify(ctx.reactions.toArray())}`);
+    await ctx.reply(
+      `Reaction received: ${JSON.stringify(ctx.reactions.toArray())}`,
+    );
+  }
+
+  @InlineQuery(/.*/)
+  onInlineQuery(): TelegrafListenerResult {
+    return {
+      inlineQuery: {
+        results: [
+          {
+            id: 'greeter',
+            type: 'article',
+            title: 'Send greeting',
+            input_message_content: {
+              message_text: 'Hello from nestjs-telega!',
+            },
+          },
+        ],
+      },
+    };
   }
 }

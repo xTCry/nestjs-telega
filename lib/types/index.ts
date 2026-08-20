@@ -23,9 +23,17 @@ type BaseComposerMethodArgs<
 
 type NonEmptyArray<T> = [T, ...T[]];
 
+type ComposerMethodArgsOrEmpty<
+  T extends Composer<never>,
+  U extends OnlyFunctionPropertyNames<T>,
+> =
+  BaseComposerMethodArgs<T, U> extends []
+    ? []
+    : NonEmptyArray<BaseComposerMethodArgs<T, U>[number]>;
+
 export type ComposerMethodArgs<
   T extends Composer<never>,
   U extends OnlyFunctionPropertyNames<T> = OnlyFunctionPropertyNames<T>,
 > = U extends 'use'
   ? BaseComposerMethodArgs<T, U>
-  : NonEmptyArray<BaseComposerMethodArgs<T, U>[number]>;
+  : ComposerMethodArgsOrEmpty<T, U>;

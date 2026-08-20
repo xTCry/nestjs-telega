@@ -1,0 +1,29 @@
+name: Sample Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  sample:
+    name: Build complete app sample
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22.x
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - run: npm ci
+
+      # Сборка библиотеки копирует локальный собранный пакет в sample.
+      - run: npm run build
+
+      - run: npm run build:sample
