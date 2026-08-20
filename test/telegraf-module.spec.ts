@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Injectable, Module } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Scenes, Telegraf } from 'telegraf';
 
-import { On, Update } from '../lib/decorators';
+import { InjectBot, On, Update } from '../lib/decorators';
+import type { TelegrafOptionsFactory } from '../lib/interfaces';
 import { ListenersExplorerService } from '../lib/services';
 import { allBotsMap } from '../lib/telegraf-all-bots.provider';
 import { TelegrafModule } from '../lib/telegraf.module';
@@ -30,13 +31,11 @@ describe('TelegrafModule', () => {
       ],
     }).compile();
     const bot = moduleRef.get<Telegraf>(getBotToken(botName));
-    const stop = jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
-
     expect(allBotsMap.get(getBotToken(botName))).toBe(bot);
 
     await moduleRef.close();
 
-    expect(stop).toHaveBeenCalledTimes(1);
+    expect(allBotsMap.has(getBotToken(botName))).toBe(false);
   });
 
   it('registers an asynchronously configured default bot', async () => {
@@ -51,13 +50,11 @@ describe('TelegrafModule', () => {
       ],
     }).compile();
     const bot = moduleRef.get<Telegraf>(getBotToken());
-    const stop = jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
-
     expect(allBotsMap.get(getBotToken())).toBe(bot);
 
     await moduleRef.close();
 
-    expect(stop).toHaveBeenCalledTimes(1);
+    expect(allBotsMap.has(getBotToken())).toBe(false);
   });
 
   it('isolates core providers for default and named bots', async () => {
@@ -145,6 +142,157 @@ describe('TelegrafModule', () => {
     expect(moduleRef.get(getTelegrafModuleOptionsToken(botName))).toEqual(
       expect.objectContaining({ token: 'reminder-token' }),
     );
+
+    await moduleRef.close();
+  });
+
+  it('supports named useClass and default useExisting async options', async () => {
+    const botName = 'reminder';
+
+    @Injectable()
+    class DefaultOptionsFactory implements TelegrafOptionsFactory {
+      createTelegrafOptions() {
+        return { token: 'default-token', launchOptions: false as const };
+      }
+    }
+
+    @Injectable()
+    class ReminderOptionsFactory implements TelegrafOptionsFactory {
+      createTelegrafOptions() {
+        return { token: 'reminder-token', launchOptions: false as const };
+      }
+    }
+
+    @Module({
+      providers: [DefaultOptionsFactory],
+      exports: [DefaultOptionsFactory],
+    })
+    class DefaultOptionsModule {}
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        DefaultOptionsModule,
+        TelegrafModule.forRootAsync({
+          imports: [DefaultOptionsModule],
+          useExisting: DefaultOptionsFactory,
+        }),
+        TelegrafModule.forRootAsync({
+          botName,
+          useClass: ReminderOptionsFactory,
+        }),
+      ],
+    }).compile();
+    const defaultBot = moduleRef.get<Telegraf>(getBotToken());
+    const reminderBot = moduleRef.get<Telegraf>(getBotToken(botName));
+
+    expect(moduleRef.get(getTelegrafModuleOptionsToken())).toEqual(
+      expect.objectContaining({ token: 'default-token' }),
+    );
+    expect(moduleRef.get(getTelegrafModuleOptionsToken(botName))).toEqual(
+      expect.objectContaining({ token: 'reminder-token' }),
+    );
+    expect(allBotsMap.get(getBotToken())).toBe(defaultBot);
+    expect(allBotsMap.get(getBotToken(botName))).toBe(reminderBot);
+
+    await moduleRef.close();
+  });
+
+  it('exports named bots for injection into application providers', async () => {
+    const botName = 'reminder';
+
+    @Injectable()
+    class BotsConsumer {
+      constructor(
+        @InjectBot() readonly defaultBot: Telegraf,
+        @InjectBot(botName) readonly reminderBot: Telegraf,
+      ) {}
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: 'default-token',
+          launchOptions: false,
+        }),
+        TelegrafModule.forRoot({
+          botName,
+          token: 'reminder-token',
+          launchOptions: false,
+        }),
+      ],
+      providers: [BotsConsumer],
+    }).compile();
+    const consumer = moduleRef.get(BotsConsumer);
+
+    expect(consumer.defaultBot).toBe(moduleRef.get(getBotToken()));
+    expect(consumer.reminderBot).toBe(moduleRef.get(getBotToken(botName)));
+
+    await moduleRef.close();
+  });
+
+  it('registers a shared update module once for each named bot', async () => {
+    const firstBotName = 'first';
+    const secondBotName = 'second';
+    const handler = jest.fn();
+
+    @Update()
+    class SharedUpdate {
+      @On('message')
+      onMessage(): void {
+        handler();
+      }
+    }
+
+    @Module({ providers: [SharedUpdate] })
+    class SharedUpdatesModule {}
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        SharedUpdatesModule,
+        TelegrafModule.forRoot({
+          botName: firstBotName,
+          token: 'first-token',
+          launchOptions: false,
+          include: [SharedUpdatesModule],
+        }),
+        TelegrafModule.forRoot({
+          botName: secondBotName,
+          token: 'second-token',
+          launchOptions: false,
+          include: [SharedUpdatesModule],
+        }),
+      ],
+    }).compile();
+    await moduleRef.init();
+
+    const firstBot = moduleRef.get<Telegraf>(getBotToken(firstBotName));
+    const secondBot = moduleRef.get<Telegraf>(getBotToken(secondBotName));
+    const botInfo = {
+      first_name: 'Test bot',
+      id: 1,
+      is_bot: true as const,
+      username: 'test_bot',
+      can_join_groups: true,
+      can_read_all_group_messages: false,
+      supports_inline_queries: false,
+    };
+    firstBot.botInfo = botInfo;
+    secondBot.botInfo = botInfo;
+    const update = {
+      update_id: 1,
+      message: {
+        chat: { first_name: 'Test', id: 1, type: 'private' as const },
+        date: 0,
+        from: { first_name: 'Test', id: 1, is_bot: false },
+        message_id: 1,
+        text: 'Hello',
+      },
+    };
+
+    await firstBot.handleUpdate(update);
+    await secondBot.handleUpdate(update);
+
+    expect(handler).toHaveBeenCalledTimes(2);
 
     await moduleRef.close();
   });

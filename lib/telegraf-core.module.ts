@@ -42,6 +42,10 @@ import {
 const isDefaultBotName = (botName?: string): boolean =>
   !botName || botName === DEFAULT_BOT_NAME;
 
+/** Telegraf бросает эту ошибку, когда экземпляр не был запущен библиотекой. */
+const isBotNotRunningError = (error: unknown): boolean =>
+  error instanceof Error && error.message === 'Bot is not running!';
+
 /** Создаёт discovery-сервис, изолированный для конкретного bot instance. */
 const createListenersExplorerProvider = (
   botName?: string,
@@ -96,8 +100,17 @@ const createTelegrafShutdownProvider = (botName?: string): FactoryProvider => {
         const bot = moduleRef.get<Telegraf<Context> | undefined>(botToken, {
           strict: false,
         });
-        bot?.stop();
-        allBotsMap.delete(botToken);
+
+        try {
+          bot?.stop();
+        } catch (error) {
+          // `launchOptions: false` не создаёт polling/webhook, который можно остановить.
+          if (!isBotNotRunningError(error)) {
+            throw error;
+          }
+        } finally {
+          allBotsMap.delete(botToken);
+        }
       },
     }),
     inject: [ModuleRef],
