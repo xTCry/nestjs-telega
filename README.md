@@ -1,8 +1,8 @@
-# NestJS Telega
+# NestJS Telega for [Telegraf](https://github.com/telegraf/telegraf)
 
-[![npm](https://img.shields.io/npm/v/nestjs-telega?style=flat-square)](https://www.npmjs.com/package/nestjs-telega)
+[![npm (telegraf)](https://img.shields.io/npm/v/nestjs-telega/telegraf?label=npm%20(telegraf)&style=flat-square)](https://www.npmjs.com/package/nestjs-telega)
 [![npm downloads](https://img.shields.io/npm/dm/nestjs-telega?style=flat-square)](https://www.npmjs.com/package/nestjs-telega)
-[![GitHub last commit](https://img.shields.io/github/last-commit/xtcry/nestjs-telega?style=flat-square)](https://github.com/xtcry/nestjs-telega)
+[![GitHub last commit](https://img.shields.io/github/last-commit/xtcry/nestjs-telega/telegraf?style=flat-square)](https://github.com/xtcry/nestjs-telega/tree/telegraf)
 <!-- [![license](https://img.shields.io/npm/l/nestjs-telega?style=flat-square)](LICENSE) -->
 
 <img src="https://nestjs.com/img/logo-small.svg" title="NestJS logotype" align="right" width="95" height="148">
@@ -11,6 +11,10 @@ NestJS Telega integrates [Telegraf](https://github.com/telegraf/telegraf) with
 [NestJS](https://github.com/nestjs/nest). It provides a NestJS module,
 decorators for Telegram updates, scenes and wizards, plus integration with
 guards, interceptors, filters and pipes.
+
+> This is the maintenance branch for the Telegraf-based release line. Its npm
+> releases are published under the [`telegraf`](https://github.com/telegraf/telegraf) dist-tag. The future default
+> release line will use [telegraf-hardened](https://github.com/telegraf-hardened/telegraf-hardened) instead.
 
 ## Features
 
@@ -27,7 +31,11 @@ guards, interceptors, filters and pipes.
 npm install nestjs-telega@telegraf telegraf
 ```
 
-`telegraf` is a peer dependency and must be installed by the application.
+Always specify `@telegraf` for this release line. Installing `nestjs-telega`
+without a tag follows npm's `latest` channel, which will point to the future
+[telegraf-hardened](https://github.com/telegraf-hardened/telegraf-hardened)
+line after its first stable release. [`telegraf`](https://github.com/telegraf/telegraf) is a peer dependency and must
+be installed by the application.
 
 ## Quick start
 
