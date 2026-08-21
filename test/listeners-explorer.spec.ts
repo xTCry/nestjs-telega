@@ -28,6 +28,7 @@ import {
   Message,
   Next,
   On,
+  Reaction,
   ReplyOptions,
   Scene,
   SceneEnter,
@@ -689,6 +690,72 @@ describe('ListenersExplorerService', () => {
     await moduleRef.close();
   });
 
+  it('registers a reaction listener from telegraf-hardened', async () => {
+    const reactions: string[] = [];
+
+    @Update()
+    class UpdateHandler {
+      @Reaction('👍')
+      onReaction(@Ctx() ctx: TelegrafContext & { match: string }): void {
+        reactions.push(ctx.match);
+      }
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: '1:test-token',
+          launchOptions: false,
+        }),
+      ],
+      providers: [UpdateHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    bot.botInfo = getTestBotInfo();
+    await bot.handleUpdate(createMessageReactionUpdate(1, '👍'));
+
+    expect(reactions).toEqual(['👍']);
+
+    await moduleRef.close();
+  });
+
+  it('passes business updates from telegraf-hardened to Nest listeners', async () => {
+    const connectionIds: string[] = [];
+
+    @Update()
+    class UpdateHandler {
+      @On('business_message')
+      onBusinessMessage(@Ctx() ctx: TelegrafContext): void {
+        if (ctx.bizConnId) {
+          connectionIds.push(ctx.bizConnId);
+        }
+      }
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: '1:test-token',
+          launchOptions: false,
+        }),
+      ],
+      providers: [UpdateHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    bot.botInfo = getTestBotInfo();
+    await bot.handleUpdate(createBusinessMessageUpdate(1));
+
+    expect(connectionIds).toEqual(['business-connection-id']);
+
+    await moduleRef.close();
+  });
+
   it('applies Nest exception filters to update listeners', async () => {
     const caughtErrors: string[] = [];
 
@@ -920,6 +987,34 @@ function createTextMessageUpdate(updateId: number, text: string) {
       from: { first_name: 'Test', id: 1, is_bot: false },
       message_id: updateId,
       text,
+    },
+  };
+}
+
+function createMessageReactionUpdate(updateId: number, emoji: '👍') {
+  return {
+    update_id: updateId,
+    message_reaction: {
+      chat: { first_name: 'Test', id: 1, type: 'private' as const },
+      date: 0,
+      message_id: 1,
+      user: { first_name: 'Test', id: 1, is_bot: false },
+      old_reaction: [],
+      new_reaction: [{ type: 'emoji' as const, emoji }],
+    },
+  };
+}
+
+function createBusinessMessageUpdate(updateId: number) {
+  return {
+    update_id: updateId,
+    business_message: {
+      business_connection_id: 'business-connection-id',
+      chat: { first_name: 'Test', id: 1, type: 'private' as const },
+      date: 0,
+      from: { first_name: 'Test', id: 1, is_bot: false },
+      message_id: 1,
+      text: 'Hello',
     },
   };
 }

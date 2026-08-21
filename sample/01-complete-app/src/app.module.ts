@@ -17,6 +17,17 @@ import { NotifierModule } from './notifier/notifier.module';
       botName: GreeterBotName,
       useFactory: () => ({
         token: process.env.GREETER_BOT_TOKEN,
+        launchOptions: {
+          allowedUpdates: [
+            'message',
+            'inline_query',
+            'message_reaction',
+            'business_message',
+          ],
+          polling: {
+            retryOnConflict: true,
+          },
+        },
         middlewaresBefore: [sessionMiddleware],
         include: [GreeterModule],
       }),

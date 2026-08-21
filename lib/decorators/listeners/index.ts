@@ -10,6 +10,7 @@ export * from './help.decorator';
 export * from './inline-query.decorator';
 export * from './mention.decorator';
 export * from './phone.decorator';
+export * from './reaction.decorator';
 export * from './settings.decorator';
 export * from './start.decorator';
 export * from './email.decorator';

@@ -3,7 +3,8 @@
 Пример запускает два независимых Telegraf-бота:
 
 - default bot: echo, `@ReplyOptions` и object listener result;
-- named `greeter` bot: session middleware, scenes, wizard и inline query;
+- named `greeter` bot: session middleware, scenes, wizard, inline query и
+  `@Reaction()` из telegraf-hardened;
 - named `notifier` bot: `@InjectBot()` и `@InjectAllBots()` в
   multi-bot configuration.
 
@@ -27,3 +28,15 @@
 ```bash
 rtk npm run build:sample
 ```
+
+## Проверка telegraf-hardened
+
+В `GreeterUpdate` обработчик `@Reaction('👍')` проверяет, что NestJS-декоратор
+корректно регистрирует новый `Composer.reaction` API из telegraf-hardened.
+Чтобы Telegram доставлял такие update-ы, бот должен быть администратором чата,
+а `message_reaction` — присутствовать в `launchOptions.allowedUpdates`.
+
+Sample также принимает `business_message` и использует `ctx.bizConnId` — новое
+поле контекста для Business API. В `launchOptions.polling` включён
+`retryOnConflict`, чтобы telegraf-hardened повторял long-polling после HTTP 409
+при быстром перезапуске приложения.

@@ -4,6 +4,7 @@ import {
   Hears,
   InlineQuery,
   On,
+  Reaction,
   Sender,
   Start,
   TelegrafListenerResult,
@@ -40,10 +41,18 @@ export class GreeterUpdate {
     await ctx.scene.enter(WIZARD_SCENE_ID);
   }
 
-  @On('message_reaction')
-  async onOn(@Ctx() ctx: Context) {
+  @Reaction('👍')
+  async onThumbsUpReaction(@Ctx() ctx: Context & { match: string }) {
+    const reaction = ctx.reactions.added.toArray()[0];
     await ctx.reply(
-      `Reaction received: ${JSON.stringify(ctx.reactions.toArray())}`,
+      `Thanks for the ${ctx.match} reaction: ${JSON.stringify(reaction)}`,
+    );
+  }
+
+  @On('business_message')
+  onBusinessMessage(@Ctx() ctx: Context): void {
+    console.log(
+      `Business message received for connection ${ctx.bizConnId ?? 'unknown'}`,
     );
   }
 

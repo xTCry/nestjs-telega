@@ -3,6 +3,23 @@
 
 By default, the bot receives updates using long-polling and requires no additional action.
 
+### Recovery after a polling conflict
+
+`telegraf-hardened` can retry long-polling after an HTTP 409 conflict. This is
+useful when an application restarts before Telegram has released the previous
+polling connection:
+
+```typescript
+TelegrafModule.forRoot({
+  token: 'TELEGRAM_BOT_TOKEN',
+  launchOptions: {
+    polling: {
+      retryOnConflict: true,
+    },
+  },
+});
+```
+
 ## Webhooks
 
 If you want to configure a telegram bot webhook, you need to get a middleware via `getBotToken` helper in your `main.ts` file.
