@@ -12,6 +12,12 @@ NestJS Telega integrates [Telegraf](https://github.com/telegraf/telegraf) with
 decorators for Telegram updates, scenes and wizards, plus integration with
 guards, interceptors, filters and pipes.
 
+> `main` is preparing the next default release line based on
+> [telegraf-hardened](https://github.com/telegraf-hardened/telegraf-hardened).
+> The stable Telegraf implementation is maintained in the
+> [telegraf branch](https://github.com/xTCry/nestjs-telega/tree/telegraf) and
+> published under the npm dist-tag `telegraf`.
+
 ## Features
 
 - Telegraf update handlers declared with NestJS decorators.
@@ -21,15 +27,23 @@ guards, interceptors, filters and pipes.
 - Typed parameter decorators and listener return values.
 - Telegraf middleware before and after discovered handlers.
 
-## Installation
+## Install the current [Telegraf](https://github.com/telegraf/telegraf) line
 
 ```bash
 npm install nestjs-telega@telegraf telegraf
 ```
 
+Always include `@telegraf` for the current
+[Telegraf](https://github.com/telegraf/telegraf)-based release line.
 `telegraf` is a peer dependency and must be installed by the application.
 
+The future [telegraf-hardened](https://github.com/telegraf-hardened/telegraf-hardened)
+line will be published as the default `latest` channel with its first stable
+release. Until then, use the explicit command above for Telegraf.
+
 ## Quick start
+
+The example below applies to the current Telegraf release line.
 
 Register the module in the root NestJS module. By default, the bot starts with
 long polling when the application is initialized.

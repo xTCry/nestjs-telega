@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress';
 
 export default defineConfig({
   title: 'NestJS Telega',
-  description: 'Telegraf integration for NestJS',
+  description: 'NestJS integration for Telegram bot frameworks',
   base: '/nestjs-telega/',
   lastUpdated: true,
   themeConfig: {
