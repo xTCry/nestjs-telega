@@ -1,5 +1,8 @@
 # Telegraf methods
-Each Telegraf instance method has own decorator in `nestjs-telega` package. The name of the decorator corresponds to the name of the Telegraf method. For example [`@Hears`](https://telegraf.js.org/classes/telegraf.html#hears), [`@On`](https://telegraf.js.org/classes/telegraf.html#on), [`@Action`](https://telegraf.js.org/classes/telegraf.html#action) and so on.
+Each [telegraf-hardened](https://github.com/telegraf-hardened/telegraf-hardened)
+instance method has own decorator in `nestjs-telega` package. The name of the
+decorator corresponds to the name of the framework method. For example
+`@Hears`, `@On`, `@Action` and so on.
 
 Now let's try simple example:
 

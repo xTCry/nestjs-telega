@@ -1,4 +1,4 @@
-import { Composer, Middleware } from 'telegraf';
+import { Composer, Middleware } from 'telegraf-hardened';
 
 export type Filter<T extends readonly unknown[], F> = T extends []
   ? []

@@ -15,7 +15,7 @@ import {
   ModulesContainer,
   Reflector,
 } from '@nestjs/core';
-import type { Context, Scenes, Telegraf } from 'telegraf';
+import type { Context, Scenes, Telegraf } from 'telegraf-hardened';
 
 import {
   TelegrafModuleAsyncOptions,

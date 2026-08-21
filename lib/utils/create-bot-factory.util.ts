@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { Context, Telegraf } from 'telegraf';
+import { Context, Telegraf } from 'telegraf-hardened';
 
 import { TelegrafModuleOptions } from '../interfaces';
 

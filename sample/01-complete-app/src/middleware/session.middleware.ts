@@ -1,3 +1,3 @@
-import { session } from 'telegraf';
+import { session } from 'telegraf-hardened';
 
-export const sessionMiddleware = session();
+export const sessionMiddleware: ReturnType<typeof session> = session();

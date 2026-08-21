@@ -1,4 +1,4 @@
-import { Context } from 'telegraf';
+import { Context } from 'telegraf-hardened';
 
 import type { TelegrafListenerResult } from '../lib/interfaces';
 import { applyListenerResult } from '../lib/utils';

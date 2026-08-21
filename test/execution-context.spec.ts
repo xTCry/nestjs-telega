@@ -1,5 +1,5 @@
 import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
-import type { Context, MiddlewareFn } from 'telegraf';
+import type { Context, MiddlewareFn } from 'telegraf-hardened';
 
 import { TelegrafParamtype } from '../lib/enums/telegraf-paramtype.enum';
 import {

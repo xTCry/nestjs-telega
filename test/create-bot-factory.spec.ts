@@ -1,7 +1,9 @@
 import { Logger } from '@nestjs/common';
-import { Telegraf } from 'telegraf';
+import { Telegraf } from 'telegraf-hardened';
 
 import { createBotFactory } from '../lib/utils';
+
+const TEST_BOT_TOKEN = '1:test-token';
 
 describe('createBotFactory', () => {
   afterEach(() => {
@@ -14,7 +16,7 @@ describe('createBotFactory', () => {
     const launch = jest.spyOn(Telegraf.prototype, 'launch');
 
     const bot = await createBotFactory({
-      token: 'test-token',
+      token: TEST_BOT_TOKEN,
       launchOptions: false,
       middlewares: [middleware],
     });
@@ -25,13 +27,22 @@ describe('createBotFactory', () => {
     stopBot(bot);
   });
 
+  it('fails fast when the bot token has an invalid format', () => {
+    expect(() =>
+      createBotFactory({
+        token: 'invalid-token',
+        launchOptions: false,
+      }),
+    ).toThrow('Telegraf: Invalid token format!');
+  });
+
   it('prefers middlewaresBefore over the deprecated middlewares alias', async () => {
     const beforeMiddleware = jest.fn();
     const legacyMiddleware = jest.fn();
     const use = jest.spyOn(Telegraf.prototype, 'use');
 
     const bot = await createBotFactory({
-      token: 'test-token',
+      token: TEST_BOT_TOKEN,
       launchOptions: false,
       middlewaresBefore: [beforeMiddleware],
       middlewares: [legacyMiddleware],
@@ -47,7 +58,7 @@ describe('createBotFactory', () => {
     const catchHandler = jest.spyOn(Telegraf.prototype, 'catch');
 
     const bot = await createBotFactory({
-      token: 'test-token',
+      token: TEST_BOT_TOKEN,
       launchOptions: false,
       useCatchLogger: false,
     });
@@ -62,7 +73,7 @@ describe('createBotFactory', () => {
     const catchHandler = jest.spyOn(Telegraf.prototype, 'catch');
     const context = { updateType: 'message' };
     const bot = await createBotFactory({
-      token: 'test-token',
+      token: TEST_BOT_TOKEN,
       launchOptions: false,
       useCatchLogger,
     });
@@ -86,7 +97,7 @@ describe('createBotFactory', () => {
     const logger = jest.spyOn(Logger, 'error').mockImplementation();
     const catchHandler = jest.spyOn(Telegraf.prototype, 'catch');
     const bot = await createBotFactory({
-      token: 'test-token',
+      token: TEST_BOT_TOKEN,
       launchOptions: false,
     });
     const handler = catchHandler.mock.calls[0]?.[0];
@@ -117,7 +128,7 @@ describe('createBotFactory', () => {
       .mockRejectedValue(launchError);
 
     const bot = await createBotFactory({
-      token: 'test-token',
+      token: TEST_BOT_TOKEN,
       launchOptions: { dropPendingUpdates: true },
       useCatchLogger,
     });
@@ -134,7 +145,7 @@ describe('createBotFactory', () => {
     const logger = jest.spyOn(Logger, 'error').mockImplementation();
     jest.spyOn(Telegraf.prototype, 'launch').mockRejectedValue(launchError);
 
-    const bot = await createBotFactory({ token: 'test-token' });
+    const bot = await createBotFactory({ token: TEST_BOT_TOKEN });
     await waitForMicrotasks();
 
     expect(logger).toHaveBeenCalledWith(
@@ -149,7 +160,7 @@ describe('createBotFactory', () => {
   it('launches without arguments when options are omitted', async () => {
     const launch = jest.spyOn(Telegraf.prototype, 'launch').mockResolvedValue();
 
-    const bot = await createBotFactory({ token: 'test-token' });
+    const bot = await createBotFactory({ token: TEST_BOT_TOKEN });
 
     expect(launch).toHaveBeenCalledWith();
 

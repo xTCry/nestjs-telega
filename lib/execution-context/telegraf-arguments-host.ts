@@ -1,6 +1,6 @@
 import { ArgumentsHost } from '@nestjs/common';
 import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
-import type { Context, MiddlewareFn } from 'telegraf';
+import type { Context, MiddlewareFn } from 'telegraf-hardened';
 
 import { TelegrafContextType } from './telegraf-execution-context';
 

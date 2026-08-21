@@ -10,6 +10,7 @@
     "^@nestjs/(.*)$",
     "^nestjs-telega(.*)$",
     "^telegraf(/.*)?$",
+    "^telegraf-hardened(/.*)?$",
     "<SEPARATOR>",
     "<THIRD_PARTY_MODULES>",
     "<SEPARATOR>",

@@ -6,7 +6,7 @@ import {
   Wizard,
   WizardStep,
 } from 'nestjs-telega';
-import type { Scenes } from 'telegraf';
+import type { Scenes } from 'telegraf-hardened';
 
 import { WIZARD_SCENE_ID } from '../../app.constants';
 

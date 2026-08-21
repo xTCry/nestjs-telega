@@ -1,8 +1,14 @@
 import { ReflectableDecorator, Reflector } from '@nestjs/core';
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import { MetadataScanner } from '@nestjs/core/metadata-scanner';
-import { Composer, Context, MiddlewareFn, Scenes, Telegraf } from 'telegraf';
-import type { SceneOptions } from 'telegraf/typings/scenes/base';
+import {
+  Composer,
+  Context,
+  MiddlewareFn,
+  Scenes,
+  Telegraf,
+} from 'telegraf-hardened';
+import type { SceneOptions } from 'telegraf-hardened/scenes';
 
 import {
   Composer as ComposerDecorator,

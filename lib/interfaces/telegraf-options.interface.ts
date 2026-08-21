@@ -3,7 +3,7 @@ import type {
   ModuleMetadata,
   Type,
 } from '@nestjs/common/interfaces';
-import type { Context, Middleware, Telegraf } from 'telegraf';
+import type { Context, Middleware, Telegraf } from 'telegraf-hardened';
 
 import type { TelegrafReplyExtra } from './telegraf-listener-result.interface';
 

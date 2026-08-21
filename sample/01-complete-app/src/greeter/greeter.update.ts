@@ -9,7 +9,7 @@ import {
   TelegrafListenerResult,
   Update,
 } from 'nestjs-telega';
-import type { UpdateType as TelegrafUpdateType } from 'telegraf/typings/telegram-types';
+import type { Types } from 'telegraf-hardened';
 
 import { HELLO_SCENE_ID, WIZARD_SCENE_ID } from '../app.constants';
 import { UpdateType } from '../common/decorators/update-type.decorator';
@@ -24,7 +24,7 @@ export class GreeterUpdate {
 
   @Hears(['hi', 'hello', 'hey', 'qq'])
   onGreetings(
-    @UpdateType() updateType: TelegrafUpdateType,
+    @UpdateType() updateType: Types.UpdateType,
     @Sender('first_name') firstName: string,
   ): TelegrafListenerResult {
     return `Hey ${firstName}`;

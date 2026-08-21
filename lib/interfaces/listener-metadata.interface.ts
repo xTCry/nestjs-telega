@@ -1,4 +1,4 @@
-import type { Composer } from 'telegraf';
+import type { Composer } from 'telegraf-hardened';
 
 import type { ComposerMethodArgs, OnlyFunctionPropertyNames } from '../types';
 

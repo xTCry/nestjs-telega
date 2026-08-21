@@ -5,7 +5,7 @@ import { ParamMetadata } from '@nestjs/core/helpers/interfaces';
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import { Module } from '@nestjs/core/injector/module';
 import { MetadataScanner } from '@nestjs/core/metadata-scanner';
-import { MiddlewareFn, Scenes, Telegraf } from 'telegraf';
+import { MiddlewareFn, Scenes, Telegraf } from 'telegraf-hardened';
 
 import { TelegrafReplyOptions as TelegrafReplyOptionsDecorator } from '../decorators/core';
 import { TelegrafContextType } from '../execution-context';

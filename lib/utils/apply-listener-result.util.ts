@@ -1,4 +1,4 @@
-import type { Context, Types } from 'telegraf';
+import type { Context, Types } from 'telegraf-hardened';
 
 import type {
   TelegrafCallbackQueryResponse,

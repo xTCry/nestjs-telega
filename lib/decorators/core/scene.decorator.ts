@@ -1,6 +1,6 @@
 import { Reflector } from '@nestjs/core';
-import type { Context } from 'telegraf';
-import type { SceneOptions } from 'telegraf/typings/scenes/base';
+import type { Context } from 'telegraf-hardened';
+import type { SceneOptions } from 'telegraf-hardened/scenes';
 
 import { SceneMetadata } from '../../interfaces';
 

@@ -1,4 +1,4 @@
-import type { Types } from 'telegraf';
+import type { Types } from 'telegraf-hardened';
 
 /** Дополнительные параметры, передаваемые Telegraf при отправке текста. */
 export type TelegrafReplyExtra = Types.ExtraReplyMessage;
@@ -20,8 +20,12 @@ export interface TelegrafCallbackQueryResponse {
 /** Результаты, возвращаемые Telegram для inline query. */
 export interface TelegrafInlineQueryResponse {
   inlineQuery: {
-    results: Parameters<import('telegraf').Context['answerInlineQuery']>[0];
-    extra?: Parameters<import('telegraf').Context['answerInlineQuery']>[1];
+    results: Parameters<
+      import('telegraf-hardened').Context['answerInlineQuery']
+    >[0];
+    extra?: Parameters<
+      import('telegraf-hardened').Context['answerInlineQuery']
+    >[1];
   };
 }
 

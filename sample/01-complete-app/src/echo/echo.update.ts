@@ -10,7 +10,7 @@ import {
   TelegrafListenerResult,
   Update,
 } from 'nestjs-telega';
-import { Telegraf } from 'telegraf';
+import { Telegraf } from 'telegraf-hardened';
 
 import { TelegrafExceptionFilter } from '../common/filters/telegraf-exception.filter';
 import { AdminGuard } from '../common/guards/admin.guard';

@@ -19,7 +19,7 @@ import {
   Composer as TelegrafComposer,
   Context as TelegrafContext,
   Telegram,
-} from 'telegraf';
+} from 'telegraf-hardened';
 
 import {
   Composer as ComposerDecorator,
@@ -59,7 +59,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
           replyOptions: { link_preview_options: { is_disabled: true } },
         }),
@@ -119,7 +119,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
         }),
       ],
@@ -164,7 +164,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
           useCatchLogger: false,
         }),
@@ -212,7 +212,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
           middlewares: [session()],
         }),
@@ -272,7 +272,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
           middlewaresBefore: [
             async (_context, next): Promise<void> => {
@@ -324,7 +324,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
         }),
       ],
@@ -399,7 +399,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
         }),
       ],
@@ -498,7 +498,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
         }),
       ],
@@ -554,7 +554,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
           include: [IncludedModule],
         }),
@@ -584,7 +584,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
         }),
       ],
@@ -620,7 +620,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
         }),
       ],
@@ -671,7 +671,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
         }),
       ],
@@ -714,7 +714,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
           useCatchLogger: filterLogger,
         }),
@@ -762,7 +762,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
         }),
       ],
@@ -850,7 +850,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
           middlewaresBefore: [session()],
           middlewaresAfter: [
@@ -892,7 +892,7 @@ describe('ListenersExplorerService', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
         }),
       ],

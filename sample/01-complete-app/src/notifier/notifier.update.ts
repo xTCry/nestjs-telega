@@ -6,7 +6,7 @@ import {
   TelegrafListenerResult,
   Update,
 } from 'nestjs-telega';
-import type { Telegraf } from 'telegraf';
+import type { Telegraf } from 'telegraf-hardened';
 
 import { GreeterBotName, NotifierBotName } from '../app.constants';
 

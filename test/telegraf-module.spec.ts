@@ -1,6 +1,6 @@
 import { Injectable, Module } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { Scenes, Telegraf } from 'telegraf';
+import { Scenes, Telegraf } from 'telegraf-hardened';
 
 import { InjectBot, On, Update } from '../lib/decorators';
 import type { TelegrafOptionsFactory } from '../lib/interfaces';
@@ -25,7 +25,7 @@ describe('TelegrafModule', () => {
       imports: [
         TelegrafModule.forRoot({
           botName,
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
         }),
       ],
@@ -43,7 +43,7 @@ describe('TelegrafModule', () => {
       imports: [
         TelegrafModule.forRootAsync({
           useFactory: () => ({
-            token: 'test-token',
+            token: '1:test-token',
             launchOptions: false,
           }),
         }),
@@ -62,12 +62,12 @@ describe('TelegrafModule', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'default-token',
+          token: '2:default-token',
           launchOptions: false,
         }),
         TelegrafModule.forRoot({
           botName,
-          token: 'reminder-token',
+          token: '3:reminder-token',
           launchOptions: false,
         }),
       ],
@@ -92,10 +92,10 @@ describe('TelegrafModule', () => {
       moduleRef.get(getTelegrafListenersExplorerToken(botName)),
     );
     expect(moduleRef.get(getTelegrafModuleOptionsToken())).toEqual(
-      expect.objectContaining({ token: 'default-token' }),
+      expect.objectContaining({ token: '2:default-token' }),
     );
     expect(moduleRef.get(getTelegrafModuleOptionsToken(botName))).toEqual(
-      expect.objectContaining({ token: 'reminder-token' }),
+      expect.objectContaining({ token: '3:reminder-token' }),
     );
 
     const defaultStop = jest
@@ -118,14 +118,14 @@ describe('TelegrafModule', () => {
       imports: [
         TelegrafModule.forRootAsync({
           useFactory: () => ({
-            token: 'default-token',
+            token: '2:default-token',
             launchOptions: false,
           }),
         }),
         TelegrafModule.forRootAsync({
           botName,
           useFactory: () => ({
-            token: 'reminder-token',
+            token: '3:reminder-token',
             launchOptions: false,
           }),
         }),
@@ -137,10 +137,10 @@ describe('TelegrafModule', () => {
     jest.spyOn(reminderBot, 'stop').mockImplementation(() => undefined);
 
     expect(moduleRef.get(getTelegrafModuleOptionsToken())).toEqual(
-      expect.objectContaining({ token: 'default-token' }),
+      expect.objectContaining({ token: '2:default-token' }),
     );
     expect(moduleRef.get(getTelegrafModuleOptionsToken(botName))).toEqual(
-      expect.objectContaining({ token: 'reminder-token' }),
+      expect.objectContaining({ token: '3:reminder-token' }),
     );
 
     await moduleRef.close();
@@ -152,14 +152,14 @@ describe('TelegrafModule', () => {
     @Injectable()
     class DefaultOptionsFactory implements TelegrafOptionsFactory {
       createTelegrafOptions() {
-        return { token: 'default-token', launchOptions: false as const };
+        return { token: '2:default-token', launchOptions: false as const };
       }
     }
 
     @Injectable()
     class ReminderOptionsFactory implements TelegrafOptionsFactory {
       createTelegrafOptions() {
-        return { token: 'reminder-token', launchOptions: false as const };
+        return { token: '3:reminder-token', launchOptions: false as const };
       }
     }
 
@@ -186,10 +186,10 @@ describe('TelegrafModule', () => {
     const reminderBot = moduleRef.get<Telegraf>(getBotToken(botName));
 
     expect(moduleRef.get(getTelegrafModuleOptionsToken())).toEqual(
-      expect.objectContaining({ token: 'default-token' }),
+      expect.objectContaining({ token: '2:default-token' }),
     );
     expect(moduleRef.get(getTelegrafModuleOptionsToken(botName))).toEqual(
-      expect.objectContaining({ token: 'reminder-token' }),
+      expect.objectContaining({ token: '3:reminder-token' }),
     );
     expect(allBotsMap.get(getBotToken())).toBe(defaultBot);
     expect(allBotsMap.get(getBotToken(botName))).toBe(reminderBot);
@@ -211,12 +211,12 @@ describe('TelegrafModule', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         TelegrafModule.forRoot({
-          token: 'default-token',
+          token: '2:default-token',
           launchOptions: false,
         }),
         TelegrafModule.forRoot({
           botName,
-          token: 'reminder-token',
+          token: '3:reminder-token',
           launchOptions: false,
         }),
       ],
@@ -251,13 +251,13 @@ describe('TelegrafModule', () => {
         SharedUpdatesModule,
         TelegrafModule.forRoot({
           botName: firstBotName,
-          token: 'first-token',
+          token: '4:first-token',
           launchOptions: false,
           include: [SharedUpdatesModule],
         }),
         TelegrafModule.forRoot({
           botName: secondBotName,
-          token: 'second-token',
+          token: '5:second-token',
           launchOptions: false,
           include: [SharedUpdatesModule],
         }),
@@ -325,7 +325,7 @@ describe('TelegrafModule', () => {
         SharedUpdatesModule,
         ReExportedUpdatesModule,
         TelegrafModule.forRoot({
-          token: 'test-token',
+          token: '1:test-token',
           launchOptions: false,
           include: [SharedUpdatesModule, ReExportedUpdatesModule],
         }),
@@ -391,13 +391,13 @@ describe('TelegrafModule', () => {
         DefaultUpdatesModule,
         ReminderUpdatesModule,
         TelegrafModule.forRoot({
-          token: 'default-token',
+          token: '2:default-token',
           launchOptions: false,
           include: [DefaultUpdatesModule],
         }),
         TelegrafModule.forRoot({
           botName,
-          token: 'reminder-token',
+          token: '3:reminder-token',
           launchOptions: false,
           include: [ReminderUpdatesModule],
         }),

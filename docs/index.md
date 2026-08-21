@@ -1,18 +1,24 @@
 # Installation
 
-> This documentation currently describes the stable
-> [Telegraf](https://github.com/telegraf/telegraf)-based release line. It is
-> maintained in the [telegraf branch](https://github.com/xTCry/nestjs-telega/tree/telegraf)
-> and published with the npm dist-tag `telegraf`. The next default line, now in
-> development on `main`, will use
+> This documentation follows the next default line, based on
 > [telegraf-hardened](https://github.com/telegraf-hardened/telegraf-hardened).
+> It requires Node.js 18 or newer and will be published as npm `latest` with
+> the first stable `1.0.0` release. The stable
+> [Telegraf](https://github.com/telegraf/telegraf)-based line is maintained in
+> the [telegraf branch](https://github.com/xTCry/nestjs-telega/tree/telegraf)
+> and must be installed with the `@telegraf` tag.
+
+## Next default line
+
+```bash
+$ npm i nestjs-telega telegraf-hardened
+```
+
+## Stable Telegraf line
 
 ```bash
 $ npm i nestjs-telega@telegraf telegraf
 ```
-
-Use the explicit `@telegraf` tag until the first stable
-`telegraf-hardened` release becomes the npm `latest` channel.
 
 Once the installation process is complete, we can import the `TelegrafModule` into the root `AppModule`.
 
@@ -30,4 +36,6 @@ import { TelegrafModule } from 'nestjs-telega';
 export class AppModule {}
 ```
 
-The `forRoot()` method accepts the same configuration object as Telegraf class constructor from the Telegraf package, as described [here](https://telegraf.js.org/#/?id=constructor).
+The `forRoot()` method accepts the same configuration object as the
+[`Telegraf` constructor](https://github.com/telegraf-hardened/telegraf-hardened)
+from `telegraf-hardened`.
