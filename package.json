@@ -55,6 +55,7 @@
     "precommit": "lint-staged",
     "prepublish:npm": "npm run build",
     "publish:npm": "npm publish --access public",
+    "publish:npm:telegraf": "npm publish --access public --tag telegraf",
     "prerelease": "npm run build",
     "release": "release-it",
     "release:minor": "release-it minor",
