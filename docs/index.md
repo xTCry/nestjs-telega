@@ -1,6 +1,6 @@
 # Installation
 ```bash
-$ npm i nestjs-telega telegraf
+$ npm i nestjs-telega@telegraf telegraf
 ```
 
 Once the installation process is complete, we can import the `TelegrafModule` into the root `AppModule`.

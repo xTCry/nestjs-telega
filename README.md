@@ -24,7 +24,7 @@ guards, interceptors, filters and pipes.
 ## Installation
 
 ```bash
-npm install nestjs-telega telegraf
+npm install nestjs-telega@telegraf telegraf
 ```
 
 `telegraf` is a peer dependency and must be installed by the application.
