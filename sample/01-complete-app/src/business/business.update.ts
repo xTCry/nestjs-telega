@@ -1,6 +1,23 @@
-import { Ctx, Message, On, Reaction, Update } from 'nestjs-telega';
+import {
+  BusinessConnection,
+  BusinessMessage,
+  Ctx,
+  DeletedBusinessMessages,
+  EditedBusinessMessage,
+  MessageReaction,
+  MessageReactionCount,
+  On,
+  Reaction,
+  Update,
+} from 'nestjs-telega';
 import { Format } from 'telegraf-hardened';
-import type { Message as TelegramMessage } from 'telegraf-hardened/types';
+import type {
+  BusinessMessagesDeleted,
+  MessageReactionCountUpdated,
+  MessageReactionUpdated,
+  BusinessConnection as TelegramBusinessConnection,
+  Update as TelegramUpdate,
+} from 'telegraf-hardened/types';
 
 import { BUSINESS_DIALOGUE_SCENE_ID } from '../app.constants';
 import { BusinessResponsesStore } from '../business-responses/business-responses.store';
@@ -12,19 +29,19 @@ export class BusinessUpdate {
   constructor(private readonly responsesStore: BusinessResponsesStore) {}
 
   @On('business_connection')
-  onBusinessConnection(@Ctx() ctx: Context): void {
-    const connection = ctx.businessConnection;
-    if (connection) {
-      console.log(
-        `Business connection ${connection.id} is ${connection.is_enabled ? 'enabled' : 'disabled'}.`,
-      );
-    }
+  onBusinessConnection(
+    @BusinessConnection() connection: TelegramBusinessConnection,
+  ): void {
+    console.log(
+      `Business connection ${connection.id} is ${connection.is_enabled ? 'enabled' : 'disabled'}.`,
+    );
   }
 
   @On('business_message')
   async onBusinessMessage(
     @Ctx() ctx: Context,
-    @Message() message: TelegramMessage,
+    @BusinessMessage()
+    message: TelegramUpdate.BusinessMessageUpdate['business_message'],
   ): Promise<void> {
     if (ctx.scene.current) {
       return;
@@ -76,34 +93,36 @@ export class BusinessUpdate {
   }
 
   @On('edited_business_message')
-  onEditedBusinessMessage(@Ctx() ctx: Context): void {
-    console.log(`Business message ${ctx.msgId ?? 'unknown'} was edited.`);
+  onEditedBusinessMessage(
+    @EditedBusinessMessage()
+    message: TelegramUpdate.EditedBusinessMessageUpdate['edited_business_message'],
+  ): void {
+    console.log(`Business message ${message.message_id} was edited.`);
   }
 
   @On('deleted_business_messages')
-  onDeletedBusinessMessages(@Ctx() ctx: Context): void {
-    const deleted = ctx.deletedBusinessMessages;
-    if (deleted) {
-      console.log(
-        `Business connection ${deleted.business_connection_id} deleted ${deleted.message_ids.length} message(s).`,
-      );
-    }
+  onDeletedBusinessMessages(
+    @DeletedBusinessMessages() deleted: BusinessMessagesDeleted,
+  ): void {
+    console.log(
+      `Business connection ${deleted.business_connection_id} deleted ${deleted.message_ids.length} message(s).`,
+    );
   }
 
   @Reaction('👍')
-  onThumbsUpReaction(@Ctx() ctx: Context & { match: string }): void {
-    const reaction = ctx.reactions.added.toArray()[0];
-    console.log(`Reaction ${ctx.match}: ${JSON.stringify(reaction)}`);
+  onThumbsUpReaction(
+    @MessageReaction() reaction: MessageReactionUpdated,
+  ): void {
+    console.log(`Reaction 👍: ${JSON.stringify(reaction.new_reaction)}`);
   }
 
   @On('message_reaction_count')
-  onReactionCount(@Ctx() ctx: Context): void {
-    const update = ctx.messageReactionCount;
-    if (update) {
-      console.log(
-        `Message ${update.message_id} has ${update.reactions.length} reaction type(s).`,
-      );
-    }
+  onReactionCount(
+    @MessageReactionCount() update: MessageReactionCountUpdated,
+  ): void {
+    console.log(
+      `Message ${update.message_id} has ${update.reactions.length} reaction type(s).`,
+    );
   }
 
   private async markAsRead(ctx: Context): Promise<void> {

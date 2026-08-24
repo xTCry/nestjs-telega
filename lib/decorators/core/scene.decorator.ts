@@ -13,6 +13,12 @@ export type SceneDecorator = (
   options?: SceneOptions<Context>,
 ) => ClassDecorator;
 
+/**
+ * Регистрирует BaseScene с указанным ID.
+ *
+ * Тип `options`: {@link import('telegraf-hardened/scenes').SceneOptions};
+ * тип `@Ctx()` внутри handlers — {@link import('telegraf-hardened').Scenes.SceneContext}.
+ */
 export const TgScene: SceneDecorator = (
   sceneId: string,
   options?: SceneOptions<Context>,

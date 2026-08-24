@@ -12,6 +12,15 @@ describe('Telegraf execution context', () => {
   const context = {
     from: { id: 1, first_name: 'Test', is_bot: false },
     message: { message_id: 1, text: 'Hello' },
+    businessConnection: { id: 'connection-1', is_enabled: true },
+    businessMessage: { message_id: 2, text: 'Business hello' },
+    editedBusinessMessage: { message_id: 3, text: 'Edited business hello' },
+    deletedBusinessMessages: {
+      business_connection_id: 'connection-1',
+      message_ids: [4, 5],
+    },
+    messageReaction: { message_id: 6, new_reaction: ['👍'] },
+    messageReactionCount: { message_id: 7, reactions: [] },
   } as unknown as Context;
   const next: MiddlewareFn<Context> = () => Promise.resolve();
 
@@ -54,6 +63,46 @@ describe('Telegraf execution context', () => {
         next,
       ]),
     ).toBe('Hello');
+    expect(
+      factory.exchangeKeyForValue(TelegrafParamtype.BUSINESS_CONNECTION, 'id', [
+        context,
+        next,
+      ]),
+    ).toBe('connection-1');
+    expect(
+      factory.exchangeKeyForValue(TelegrafParamtype.BUSINESS_MESSAGE, 'text', [
+        context,
+        next,
+      ]),
+    ).toBe('Business hello');
+    expect(
+      factory.exchangeKeyForValue(
+        TelegrafParamtype.EDITED_BUSINESS_MESSAGE,
+        'text',
+        [context, next],
+      ),
+    ).toBe('Edited business hello');
+    expect(
+      factory.exchangeKeyForValue(
+        TelegrafParamtype.DELETED_BUSINESS_MESSAGES,
+        'message_ids',
+        [context, next],
+      ),
+    ).toEqual([4, 5]);
+    expect(
+      factory.exchangeKeyForValue(
+        TelegrafParamtype.MESSAGE_REACTION,
+        'message_id',
+        [context, next],
+      ),
+    ).toBe(6);
+    expect(
+      factory.exchangeKeyForValue(
+        TelegrafParamtype.MESSAGE_REACTION_COUNT,
+        'message_id',
+        [context, next],
+      ),
+    ).toBe(7);
     expect(
       factory.exchangeKeyForValue(TelegrafParamtype.SENDER, 'id', []),
     ).toBeUndefined();

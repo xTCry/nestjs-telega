@@ -8,6 +8,11 @@ export const WizardStepMetadataDecorator =
 
 type WizardStepDecorator = (step: number) => MethodDecorator;
 
+/**
+ * Помечает listener как шаг wizard-сцены.
+ *
+ * Тип `@Ctx()` параметра: {@link import('telegraf-hardened').Scenes.WizardContext}.
+ */
 export const TgWizardStep: WizardStepDecorator = (
   step: number,
 ): MethodDecorator => WizardStepMetadataDecorator({ step });

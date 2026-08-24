@@ -24,6 +24,18 @@ export class TelegrafParamsFactory implements ParamsFactory {
         return getContextProperty(ctx?.from, data);
       case TelegrafParamtype.MESSAGE:
         return getContextProperty(ctx?.message, data);
+      case TelegrafParamtype.BUSINESS_CONNECTION:
+        return getContextProperty(ctx?.businessConnection, data);
+      case TelegrafParamtype.BUSINESS_MESSAGE:
+        return getContextProperty(ctx?.businessMessage, data);
+      case TelegrafParamtype.EDITED_BUSINESS_MESSAGE:
+        return getContextProperty(ctx?.editedBusinessMessage, data);
+      case TelegrafParamtype.DELETED_BUSINESS_MESSAGES:
+        return getContextProperty(ctx?.deletedBusinessMessages, data);
+      case TelegrafParamtype.MESSAGE_REACTION:
+        return getContextProperty(ctx?.messageReaction, data);
+      case TelegrafParamtype.MESSAGE_REACTION_COUNT:
+        return getContextProperty(ctx?.messageReactionCount, data);
       default:
         return null;
     }

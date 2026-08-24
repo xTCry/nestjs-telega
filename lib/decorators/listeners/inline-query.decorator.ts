@@ -9,6 +9,9 @@ type InlineQueryDecorator = ReturnType<
 /**
  * Registers middleware for handling inline_query actions with regular expressions.
  *
+ * Тип `@Ctx()` параметра: `NarrowedContext<Context, Update.InlineQueryUpdate>`
+ * из `telegraf-hardened`; regexp match доступен как `ctx.match`.
+ *
  * @see https://telegraf.js.org/#/?id=inlinequery
  */
 export const TgInlineQuery: InlineQueryDecorator =

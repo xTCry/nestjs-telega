@@ -9,6 +9,9 @@ type CommandDecorator = ReturnType<
 /**
  * Command handling.
  *
+ * Тип `@Ctx()` параметра: `NarrowedContext<Context, Update.MessageUpdate>`
+ * из `telegraf-hardened`; аргументы команды доступны как `ctx.match`.
+ *
  * @see https://telegraf.js.org/#/?id=command
  */
 export const TgCommand: CommandDecorator = ListenerDecorator('command');

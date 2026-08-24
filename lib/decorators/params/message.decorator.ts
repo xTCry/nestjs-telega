@@ -3,6 +3,13 @@ import { PipeTransform, Type } from '@nestjs/common';
 import { TelegrafParamtype } from '../../enums/telegraf-paramtype.enum';
 import { createTelegrafPipesParamDecorator } from '../../utils/param-decorator.util';
 
+/**
+ * Извлекает `message` текущего update или его поле.
+ *
+ * Тип параметра: {@link import('telegraf-hardened/types').Message}. После
+ * `@On('sticker')`, `@On('text')` и других фильтров укажите соответствующий
+ * narrowed message type из `telegraf-hardened/types` вручную.
+ */
 export function TgMessage(): ParameterDecorator;
 export function TgMessage(
   ...pipes: (Type<PipeTransform> | PipeTransform)[]

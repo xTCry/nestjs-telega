@@ -4,27 +4,27 @@ import { TelegrafParamtype } from '../../enums/telegraf-paramtype.enum';
 import { createTelegrafPipesParamDecorator } from '../../utils/param-decorator.util';
 
 /**
- * Извлекает отправителя update или его поле.
+ * Извлекает update об изменении реакции пользователя.
  *
- * Тип параметра: {@link import('telegraf-hardened/types').User}.
+ * Тип параметра: {@link import('telegraf-hardened/types').MessageReactionUpdated}.
  */
-export function TgSender(): ParameterDecorator;
-export function TgSender(
+export function TgMessageReaction(): ParameterDecorator;
+export function TgMessageReaction(
   ...pipes: (Type<PipeTransform> | PipeTransform)[]
 ): ParameterDecorator;
-export function TgSender(
+export function TgMessageReaction(
   property: string,
   ...pipes: (Type<PipeTransform> | PipeTransform)[]
 ): ParameterDecorator;
-export function TgSender(
+export function TgMessageReaction(
   property?: string | (Type<PipeTransform> | PipeTransform),
   ...pipes: (Type<PipeTransform> | PipeTransform)[]
 ) {
-  return createTelegrafPipesParamDecorator(TelegrafParamtype.SENDER)(
+  return createTelegrafPipesParamDecorator(TelegrafParamtype.MESSAGE_REACTION)(
     property,
     ...pipes,
   );
 }
 
-/** Alias for {@link TgSender}. */
-export const Sender = TgSender;
+/** Alias for {@link TgMessageReaction}. */
+export const MessageReaction = TgMessageReaction;
