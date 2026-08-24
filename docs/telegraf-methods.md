@@ -80,3 +80,48 @@ export class BusinessUpdate {
   }
 }
 ```
+
+## Callback listener results
+
+`TelegrafListenerResult` can update the message associated with the current
+callback query without injecting `Context`. The library answers that callback
+query with an empty response after a successful UI action, so Telegram stops
+showing its loading indicator.
+
+```ts
+import { Action, TelegrafListenerResult, Update } from 'nestjs-telega';
+import { Markup } from 'telegraf-hardened';
+
+@Update()
+export class SettingsUpdate {
+  @Action('settings:enable')
+  onEnable(): TelegrafListenerResult {
+    return {
+      editMessage: {
+        text: '<b>Notifications enabled</b>',
+        extra: {
+          parse_mode: 'HTML',
+          ...Markup.inlineKeyboard([
+            Markup.button.callback('Remove controls', 'settings:clear'),
+          ]),
+        },
+      },
+    };
+  }
+
+  @Action('settings:clear')
+  onClear(): TelegrafListenerResult {
+    return { editReplyMarkup: undefined };
+  }
+
+  @Action('settings:delete')
+  onDelete(): TelegrafListenerResult {
+    return { deleteMessage: true };
+  }
+}
+```
+
+`editMessage` and `editReplyMarkup` work for callback and inline-query
+messages. `deleteMessage` works only where the context identifies both a chat
+and a message. The library silently ignores these result variants for an
+incompatible update, just like callback and inline-query response results.

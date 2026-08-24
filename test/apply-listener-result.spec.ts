@@ -104,6 +104,96 @@ describe('applyListenerResult', () => {
     });
   });
 
+  it('edits the message associated with a callback result', async () => {
+    const editMessageText = jest.fn().mockResolvedValue(true);
+    const answerCbQuery = jest.fn().mockResolvedValue(undefined);
+
+    await applyListenerResult(
+      {
+        callbackQuery: { id: 'callback-id' },
+        editMessageText,
+        answerCbQuery,
+      } as unknown as Context,
+      {
+        editMessage: {
+          text: '<b>Updated</b>',
+          extra: { parse_mode: 'HTML' },
+        },
+      },
+      {},
+    );
+
+    expect(editMessageText).toHaveBeenCalledWith('<b>Updated</b>', {
+      parse_mode: 'HTML',
+    });
+    expect(answerCbQuery).toHaveBeenCalledWith();
+  });
+
+  it('edits the inline keyboard associated with a callback result', async () => {
+    const editMessageReplyMarkup = jest.fn().mockResolvedValue(true);
+    const answerCbQuery = jest.fn().mockResolvedValue(undefined);
+    const markup = { inline_keyboard: [] };
+
+    await applyListenerResult(
+      {
+        callbackQuery: { id: 'callback-id' },
+        editMessageReplyMarkup,
+        answerCbQuery,
+      } as unknown as Context,
+      { editReplyMarkup: markup },
+      {},
+    );
+
+    expect(editMessageReplyMarkup).toHaveBeenCalledWith(markup);
+    expect(answerCbQuery).toHaveBeenCalledWith();
+  });
+
+  it('deletes the message associated with a callback result', async () => {
+    const deleteMessage = jest.fn().mockResolvedValue(true);
+    const answerCbQuery = jest.fn().mockResolvedValue(undefined);
+
+    await applyListenerResult(
+      {
+        callbackQuery: { id: 'callback-id' },
+        chat: { id: 1 },
+        msgId: 10,
+        deleteMessage,
+        answerCbQuery,
+      } as unknown as Context,
+      { deleteMessage: true },
+      {},
+    );
+
+    expect(deleteMessage).toHaveBeenCalledWith();
+    expect(answerCbQuery).toHaveBeenCalledWith();
+  });
+
+  it('does not apply a message UI result outside a compatible update', async () => {
+    const editMessageText = jest.fn();
+    const editMessageReplyMarkup = jest.fn();
+    const deleteMessage = jest.fn();
+
+    await applyListenerResult(
+      { editMessageText } as unknown as Context,
+      { editMessage: { text: 'Updated' } },
+      {},
+    );
+    await applyListenerResult(
+      { editMessageReplyMarkup } as unknown as Context,
+      { editReplyMarkup: undefined },
+      {},
+    );
+    await applyListenerResult(
+      { deleteMessage, msgId: undefined } as unknown as Context,
+      { deleteMessage: true },
+      {},
+    );
+
+    expect(editMessageText).not.toHaveBeenCalled();
+    expect(editMessageReplyMarkup).not.toHaveBeenCalled();
+    expect(deleteMessage).not.toHaveBeenCalled();
+  });
+
   it('ignores a message result when the update has no chat', async () => {
     const reply = jest.fn();
 

@@ -1,4 +1,4 @@
-import type { Types } from 'telegraf-hardened';
+import type { Context, Types } from 'telegraf-hardened';
 
 /** Дополнительные параметры, передаваемые Telegraf при отправке текста. */
 export type TelegrafReplyExtra = Types.ExtraReplyMessage;
@@ -20,13 +20,27 @@ export interface TelegrafCallbackQueryResponse {
 /** Результаты, возвращаемые Telegram для inline query. */
 export interface TelegrafInlineQueryResponse {
   inlineQuery: {
-    results: Parameters<
-      import('telegraf-hardened').Context['answerInlineQuery']
-    >[0];
-    extra?: Parameters<
-      import('telegraf-hardened').Context['answerInlineQuery']
-    >[1];
+    results: Parameters<Context['answerInlineQuery']>[0];
+    extra?: Parameters<Context['answerInlineQuery']>[1];
   };
+}
+
+/** Результат, который изменяет сообщение, связанное с текущим callback update-ом. */
+export interface TelegrafEditMessageResponse {
+  editMessage: {
+    text: Parameters<Context['editMessageText']>[0];
+    extra?: Parameters<Context['editMessageText']>[1];
+  };
+}
+
+/** Результат, который изменяет inline keyboard текущего callback-сообщения. */
+export interface TelegrafEditReplyMarkupResponse {
+  editReplyMarkup: Parameters<Context['editMessageReplyMarkup']>[0];
+}
+
+/** Результат, который удаляет сообщение, связанное с текущим update-ом. */
+export interface TelegrafDeleteMessageResponse {
+  deleteMessage: true;
 }
 
 /** Допустимое значение, возвращаемое декорированным обработчиком. */
@@ -35,6 +49,9 @@ export type TelegrafListenerResult =
   | TelegrafListenerResponse
   | TelegrafCallbackQueryResponse
   | TelegrafInlineQueryResponse
+  | TelegrafEditMessageResponse
+  | TelegrafEditReplyMarkupResponse
+  | TelegrafDeleteMessageResponse
   | false
   | null
   | undefined

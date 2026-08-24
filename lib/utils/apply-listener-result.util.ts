@@ -2,6 +2,9 @@ import type { Context, Types } from 'telegraf-hardened';
 
 import type {
   TelegrafCallbackQueryResponse,
+  TelegrafDeleteMessageResponse,
+  TelegrafEditMessageResponse,
+  TelegrafEditReplyMarkupResponse,
   TelegrafInlineQueryResponse,
   TelegrafListenerResponse,
   TelegrafListenerResult,
@@ -21,6 +24,21 @@ export async function applyListenerResult(
 
   if (isTelegrafInlineQueryResponse(result)) {
     await applyInlineQueryResult(ctx, result);
+    return;
+  }
+
+  if (isTelegrafEditMessageResponse(result)) {
+    await applyEditMessageResult(ctx, result);
+    return;
+  }
+
+  if (isTelegrafEditReplyMarkupResponse(result)) {
+    await applyEditReplyMarkupResult(ctx, result);
+    return;
+  }
+
+  if (isTelegrafDeleteMessageResponse(result)) {
+    await applyDeleteMessageResult(ctx);
     return;
   }
 
@@ -81,6 +99,51 @@ async function applyInlineQueryResult(
   );
 }
 
+/** Изменение возможно лишь для сообщения, связанного с callback или inline query. */
+async function applyEditMessageResult(
+  ctx: Context,
+  result: TelegrafEditMessageResponse,
+): Promise<void> {
+  if (!canEditCurrentMessage(ctx)) {
+    return;
+  }
+
+  await ctx.editMessageText(result.editMessage.text, result.editMessage.extra);
+  await answerCallbackQueryIfPresent(ctx);
+}
+
+async function applyEditReplyMarkupResult(
+  ctx: Context,
+  result: TelegrafEditReplyMarkupResponse,
+): Promise<void> {
+  if (!canEditCurrentMessage(ctx)) {
+    return;
+  }
+
+  await ctx.editMessageReplyMarkup(result.editReplyMarkup);
+  await answerCallbackQueryIfPresent(ctx);
+}
+
+async function applyDeleteMessageResult(ctx: Context): Promise<void> {
+  if (typeof ctx.msgId !== 'number' || !ctx.chat) {
+    return;
+  }
+
+  await ctx.deleteMessage();
+  await answerCallbackQueryIfPresent(ctx);
+}
+
+function canEditCurrentMessage(ctx: Context): boolean {
+  return Boolean(ctx.callbackQuery || ctx.inlineMessageId);
+}
+
+/** Убирает индикатор загрузки у callback-кнопки после декларативного UI-действия. */
+async function answerCallbackQueryIfPresent(ctx: Context): Promise<void> {
+  if (ctx.callbackQuery) {
+    await ctx.answerCbQuery();
+  }
+}
+
 /** Объект `reply_parameters` объединяется отдельно, чтобы не терять module defaults. */
 function mergeReplyOptions(
   defaults: TelegrafReplyExtra,
@@ -135,4 +198,29 @@ function isTelegrafInlineQueryResponse(
   value: TelegrafListenerResult,
 ): value is TelegrafInlineQueryResponse {
   return typeof value === 'object' && value !== null && 'inlineQuery' in value;
+}
+
+function isTelegrafEditMessageResponse(
+  value: TelegrafListenerResult,
+): value is TelegrafEditMessageResponse {
+  return typeof value === 'object' && value !== null && 'editMessage' in value;
+}
+
+function isTelegrafEditReplyMarkupResponse(
+  value: TelegrafListenerResult,
+): value is TelegrafEditReplyMarkupResponse {
+  return (
+    typeof value === 'object' && value !== null && 'editReplyMarkup' in value
+  );
+}
+
+function isTelegrafDeleteMessageResponse(
+  value: TelegrafListenerResult,
+): value is TelegrafDeleteMessageResponse {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'deleteMessage' in value &&
+    value.deleteMessage === true
+  );
 }

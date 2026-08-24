@@ -21,7 +21,9 @@ account и передаёт ему только разрешённые Business 
 - Любой текст — Unicode-safe echo: emoji не превращаются в повреждённые
   символы при развороте строки.
 - `/format`, `/keyboard`, `/menu` — форматированный текст, inline и reply
-  keyboards соответственно. Кнопка `Acknowledge` подтверждает callback query.
+  keyboards соответственно. В `/keyboard` кнопки демонстрируют callback
+  acknowledgement, декларативное редактирование сообщения и клавиатуры, а
+  также удаление сообщения.
 - `/features` — список подключённых возможностей telegraf-hardened.
 - `/admin` — панель администратора. Доступна только ID из `ADMIN_IDS`.
   Здесь можно включать/выключать automatic replies, добавлять text/sticker/
@@ -97,7 +99,9 @@ telegraf-hardened.
 ### Команды для ручной проверки
 
 - Основной bot: `/format`, `/keyboard`, `/menu`, `/admin` и текстовое сообщение.
-  Нажатие `Acknowledge` проверяет `@Action()` и callback listener result.
+  В `/keyboard` нажмите `Acknowledge`, затем `Edit message`; новая клавиатура
+  позволяет проверить декларативные `editMessage`, `editReplyMarkup` и
+  `deleteMessage` listener results.
   `/admin` открывает цветные Bot API 9.4 inline-кнопки. При заданном
   `BUTTON_CUSTOM_EMOJI_ID` они также используют `icon_custom_emoji_id`.
   ID не универсален: получите подходящий через `/buttonemoji <custom emoji>`.

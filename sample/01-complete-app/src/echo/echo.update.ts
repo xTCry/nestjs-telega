@@ -224,9 +224,10 @@ export class EchoUpdate {
   @Command('keyboard')
   async onKeyboard(@Ctx() ctx: Context): Promise<TelegrafListenerResult> {
     return {
-      text: 'This inline keyboard is created with telegraf-hardened Markup helpers.',
+      text: 'This inline keyboard is created with telegraf-hardened Markup helpers. It also demonstrates declarative callback UI results.',
       extra: Markup.inlineKeyboard([
         Markup.button.callback('Acknowledge', 'echo:acknowledge'),
+        Markup.button.callback('Edit message', 'echo:edit'),
       ]),
     };
   }
@@ -238,6 +239,31 @@ export class EchoUpdate {
         text: 'Acknowledged',
       },
     };
+  }
+
+  @Action('echo:edit')
+  onEdit(): TelegrafListenerResult {
+    return {
+      editMessage: {
+        text: 'This message was edited by a declarative listener result.',
+        extra: Markup.inlineKeyboard([
+          Markup.button.callback('Remove keyboard', 'echo:remove-keyboard'),
+          Markup.button.callback('Delete message', 'echo:delete'),
+        ]),
+      },
+    };
+  }
+
+  @Action('echo:remove-keyboard')
+  onRemoveKeyboard(): TelegrafListenerResult {
+    return {
+      editReplyMarkup: undefined,
+    };
+  }
+
+  @Action('echo:delete')
+  onDelete(): TelegrafListenerResult {
+    return { deleteMessage: true };
   }
 
   @On('text')
