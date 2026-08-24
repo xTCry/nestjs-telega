@@ -119,6 +119,10 @@ describe('applyListenerResult', () => {
           text: '<b>Updated</b>',
           extra: { parse_mode: 'HTML' },
         },
+        callbackQuery: {
+          text: 'Updated',
+          extra: { show_alert: true },
+        },
       },
       {},
     );
@@ -126,7 +130,9 @@ describe('applyListenerResult', () => {
     expect(editMessageText).toHaveBeenCalledWith('<b>Updated</b>', {
       parse_mode: 'HTML',
     });
-    expect(answerCbQuery).toHaveBeenCalledWith();
+    expect(answerCbQuery).toHaveBeenCalledWith('Updated', {
+      show_alert: true,
+    });
   });
 
   it('edits the inline keyboard associated with a callback result', async () => {

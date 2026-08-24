@@ -251,6 +251,9 @@ export class EchoUpdate {
           Markup.button.callback('Delete message', 'echo:delete'),
         ]),
       },
+      callbackQuery: {
+        text: 'Message updated.',
+      },
     };
   }
 

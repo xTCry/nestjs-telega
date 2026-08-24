@@ -106,6 +106,7 @@ export class SettingsUpdate {
           ]),
         },
       },
+      callbackQuery: { text: 'Enabled' },
     };
   }
 
@@ -123,5 +124,7 @@ export class SettingsUpdate {
 
 `editMessage` and `editReplyMarkup` work for callback and inline-query
 messages. `deleteMessage` works only where the context identifies both a chat
-and a message. The library silently ignores these result variants for an
+and a message. A UI result automatically acknowledges the callback query; add
+the optional `callbackQuery` property, as in the example, to show a custom
+toast or alert. The library silently ignores these result variants for an
 incompatible update, just like callback and inline-query response results.

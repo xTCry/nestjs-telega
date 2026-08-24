@@ -17,6 +17,11 @@ export interface TelegrafCallbackQueryResponse {
   };
 }
 
+/** Необязательное подтверждение callback query после декларативного UI-действия. */
+export interface TelegrafCallbackUiResult {
+  callbackQuery?: TelegrafCallbackQueryResponse['callbackQuery'];
+}
+
 /** Результаты, возвращаемые Telegram для inline query. */
 export interface TelegrafInlineQueryResponse {
   inlineQuery: {
@@ -26,7 +31,7 @@ export interface TelegrafInlineQueryResponse {
 }
 
 /** Результат, который изменяет сообщение, связанное с текущим callback update-ом. */
-export interface TelegrafEditMessageResponse {
+export interface TelegrafEditMessageResponse extends TelegrafCallbackUiResult {
   editMessage: {
     text: Parameters<Context['editMessageText']>[0];
     extra?: Parameters<Context['editMessageText']>[1];
@@ -34,12 +39,14 @@ export interface TelegrafEditMessageResponse {
 }
 
 /** Результат, который изменяет inline keyboard текущего callback-сообщения. */
-export interface TelegrafEditReplyMarkupResponse {
+export interface TelegrafEditReplyMarkupResponse
+  extends TelegrafCallbackUiResult {
   editReplyMarkup: Parameters<Context['editMessageReplyMarkup']>[0];
 }
 
 /** Результат, который удаляет сообщение, связанное с текущим update-ом. */
-export interface TelegrafDeleteMessageResponse {
+export interface TelegrafDeleteMessageResponse
+  extends TelegrafCallbackUiResult {
   deleteMessage: true;
 }
 

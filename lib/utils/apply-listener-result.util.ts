@@ -2,6 +2,7 @@ import type { Context, Types } from 'telegraf-hardened';
 
 import type {
   TelegrafCallbackQueryResponse,
+  TelegrafCallbackUiResult,
   TelegrafDeleteMessageResponse,
   TelegrafEditMessageResponse,
   TelegrafEditReplyMarkupResponse,
@@ -17,16 +18,6 @@ export async function applyListenerResult(
   result: TelegrafListenerResult,
   replyOptions: TelegrafReplyExtra,
 ): Promise<void> {
-  if (isTelegrafCallbackQueryResponse(result)) {
-    await applyCallbackQueryResult(ctx, result);
-    return;
-  }
-
-  if (isTelegrafInlineQueryResponse(result)) {
-    await applyInlineQueryResult(ctx, result);
-    return;
-  }
-
   if (isTelegrafEditMessageResponse(result)) {
     await applyEditMessageResult(ctx, result);
     return;
@@ -38,7 +29,17 @@ export async function applyListenerResult(
   }
 
   if (isTelegrafDeleteMessageResponse(result)) {
-    await applyDeleteMessageResult(ctx);
+    await applyDeleteMessageResult(ctx, result);
+    return;
+  }
+
+  if (isTelegrafCallbackQueryResponse(result)) {
+    await applyCallbackQueryResult(ctx, result);
+    return;
+  }
+
+  if (isTelegrafInlineQueryResponse(result)) {
+    await applyInlineQueryResult(ctx, result);
     return;
   }
 
@@ -109,7 +110,7 @@ async function applyEditMessageResult(
   }
 
   await ctx.editMessageText(result.editMessage.text, result.editMessage.extra);
-  await answerCallbackQueryIfPresent(ctx);
+  await answerCallbackQueryAfterUiAction(ctx, result);
 }
 
 async function applyEditReplyMarkupResult(
@@ -121,27 +122,43 @@ async function applyEditReplyMarkupResult(
   }
 
   await ctx.editMessageReplyMarkup(result.editReplyMarkup);
-  await answerCallbackQueryIfPresent(ctx);
+  await answerCallbackQueryAfterUiAction(ctx, result);
 }
 
-async function applyDeleteMessageResult(ctx: Context): Promise<void> {
+async function applyDeleteMessageResult(
+  ctx: Context,
+  result: TelegrafDeleteMessageResponse,
+): Promise<void> {
   if (typeof ctx.msgId !== 'number' || !ctx.chat) {
     return;
   }
 
   await ctx.deleteMessage();
-  await answerCallbackQueryIfPresent(ctx);
+  await answerCallbackQueryAfterUiAction(ctx, result);
 }
 
 function canEditCurrentMessage(ctx: Context): boolean {
   return Boolean(ctx.callbackQuery || ctx.inlineMessageId);
 }
 
-/** Убирает индикатор загрузки у callback-кнопки после декларативного UI-действия. */
-async function answerCallbackQueryIfPresent(ctx: Context): Promise<void> {
-  if (ctx.callbackQuery) {
-    await ctx.answerCbQuery();
+/** Убирает индикатор загрузки либо показывает заданный обработчиком callback-ответ. */
+async function answerCallbackQueryAfterUiAction(
+  ctx: Context,
+  result: TelegrafCallbackUiResult,
+): Promise<void> {
+  if (!ctx.callbackQuery) {
+    return;
   }
+
+  if (!result.callbackQuery) {
+    await ctx.answerCbQuery();
+    return;
+  }
+
+  await ctx.answerCbQuery(
+    result.callbackQuery.text,
+    result.callbackQuery.extra,
+  );
 }
 
 /** Объект `reply_parameters` объединяется отдельно, чтобы не терять module defaults. */
