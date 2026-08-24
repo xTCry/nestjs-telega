@@ -58,7 +58,10 @@ const responseCancelButtons = [
 ] satisfies InlineKeyboardButton.CallbackButton[][];
 
 const responseListButtons = [
-  [button('Back to controls', 'admin:back', 'primary')],
+  [
+    button('Back to controls', 'admin:back', 'primary'),
+    button('Delete a response', 'admin:remove', 'danger'),
+  ],
 ] satisfies InlineKeyboardButton.CallbackButton[][];
 
 export const createAdminKeyboard = (enabled = true) =>
@@ -90,6 +93,7 @@ export const createAdminDashboardText = (
 
 export const createAdminResponsesText = (
   config: BusinessResponsesConfig,
+  notice?: string,
 ): string => {
   const formatItems = (items: string[]): string =>
     items.length
@@ -97,13 +101,16 @@ export const createAdminResponsesText = (
       : '—';
 
   return [
+    notice,
     '<b>Configured automatic replies</b>',
     `<b>Automatic replies:</b> ${config.enabled ? 'enabled' : 'disabled'}`,
     `<b>Text</b>\n${formatItems(config.textReplies)}`,
     `<b>Stickers</b>\n${formatItems(config.stickerReplies)}`,
     `<b>Reactions</b>\n${formatItems(config.reactionReplies)}`,
     'Use /remove &lt;text|sticker|reaction&gt; &lt;number&gt; to delete an item.',
-  ].join('\n\n');
+  ]
+    .filter(Boolean)
+    .join('\n\n');
 };
 
 /** Редактирует сообщение с inline-кнопкой или создаёт его для command/update. */
@@ -157,10 +164,11 @@ export const renderAdminDashboard = async (
 export const renderAdminResponses = async (
   ctx: Context,
   config: BusinessResponsesConfig,
+  notice?: string,
 ): Promise<void> =>
   editOrReply(
     ctx,
-    createAdminResponsesText(config),
+    createAdminResponsesText(config, notice),
     createResponseListKeyboard(),
   );
 

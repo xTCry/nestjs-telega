@@ -28,7 +28,7 @@ import {
 } from './admin-keyboard';
 
 type ResponseWizardState = {
-  category: BusinessResponseCategory;
+  category?: BusinessResponseCategory;
   value?: string;
   /** ID панели, которую редактируем вместо отправки новых wizard-сообщений. */
   panelMessageId?: number;
@@ -44,10 +44,16 @@ export class AdminResponseWizard {
 
   @SceneEnter()
   async onEnter(@Ctx() ctx: ResponseWizardContext): Promise<void> {
+    const category = ctx.scene.state.category;
+    if (!category) {
+      await ctx.scene.leave();
+      return;
+    }
+
     ctx.scene.state.panelMessageId = ctx.callbackQuery?.message?.message_id;
     await renderResponseInputPrompt(
       ctx,
-      `Send a ${getCategoryLabel(ctx.scene.state.category)}. Use /cancel or the button below to stop.`,
+      `Send a ${getCategoryLabel(category)}. Use /cancel or the button below to stop.`,
     );
   }
 
@@ -57,15 +63,18 @@ export class AdminResponseWizard {
     @Ctx() ctx: ResponseWizardContext,
     @Message('text') value: string,
   ): Promise<void> {
-    if (ctx.scene.state.category === 'sticker') {
+    const category = ctx.scene.state.category;
+    if (!category) {
+      await this.leaveWithDashboard(ctx, 'Response editing cancelled.');
+      return;
+    }
+
+    if (category === 'sticker') {
       await ctx.reply('Send the sticker itself, not its text representation.');
       return;
     }
 
-    if (
-      ctx.scene.state.category === 'reaction' &&
-      !isReactionEmoji(value.trim())
-    ) {
+    if (category === 'reaction' && !isReactionEmoji(value.trim())) {
       await ctx.reply(
         'Send one supported Telegram reaction emoji, for example 👍.',
       );
@@ -87,9 +96,10 @@ export class AdminResponseWizard {
     @Ctx() ctx: ResponseWizardContext,
     @Message('sticker') sticker: Sticker,
   ): Promise<void> {
-    if (ctx.scene.state.category !== 'sticker') {
+    const category = ctx.scene.state.category;
+    if (category !== 'sticker') {
       await ctx.reply(
-        `This action expects a ${getCategoryLabel(ctx.scene.state.category)}.`,
+        `This action expects a ${getCategoryLabel(category ?? 'sticker')}.`,
       );
       return;
     }
@@ -106,15 +116,13 @@ export class AdminResponseWizard {
   @Action('admin:response:save')
   @WizardStep(1)
   async onSave(@Ctx() ctx: ResponseWizardContext): Promise<void> {
-    if (!ctx.scene.state.value) {
+    const { category, value } = ctx.scene.state;
+    if (!category || !value) {
       await ctx.answerCbQuery('Send a response before saving it.');
       return;
     }
 
-    const config = await this.responsesStore.add(
-      ctx.scene.state.category,
-      ctx.scene.state.value,
-    );
+    const config = await this.responsesStore.add(category, value);
     await ctx.answerCbQuery('Response saved.');
     await ctx.scene.leave();
     await this.replyDashboard(ctx, config, 'Response saved.');

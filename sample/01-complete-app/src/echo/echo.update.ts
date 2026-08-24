@@ -128,6 +128,18 @@ export class EchoUpdate {
     await renderAdminResponses(ctx, config);
   }
 
+  @Action('admin:remove')
+  @UseGuards(AdminGuard)
+  async onRemoveResponseHelp(@Ctx() ctx: Context): Promise<void> {
+    const config = await this.responsesStore.getConfig();
+    await ctx.answerCbQuery();
+    await renderAdminResponses(
+      ctx,
+      config,
+      'Send /remove &lt;text|sticker|reaction&gt; &lt;number&gt;.',
+    );
+  }
+
   @Action('admin:back')
   @UseGuards(AdminGuard)
   async onAdminBack(@Ctx() ctx: Context): Promise<void> {
@@ -150,15 +162,22 @@ export class EchoUpdate {
   @UseGuards(AdminGuard)
   async onRemoveResponse(
     @Ctx() ctx: Context & { match: { args: string[] } },
-  ): Promise<string> {
+  ): Promise<void> {
     const [category, rawIndex] = ctx.match.args;
     if (!isResponseCategory(category)) {
-      return `Usage: /remove <${['text', 'sticker', 'reaction'].join('|')}> <number>`;
+      await ctx.reply(
+        `Usage: /remove <${['text', 'sticker', 'reaction'].join('|')}> <number>`,
+      );
+      return;
     }
 
     const index = Number(rawIndex) - 1;
-    await this.responsesStore.remove(category, index);
-    return `Removed ${getCategoryLabel(category)} response #${index + 1}.`;
+    const config = await this.responsesStore.remove(category, index);
+    await renderAdminResponses(
+      ctx,
+      config,
+      `Removed ${getCategoryLabel(category)} response #${index + 1}.`,
+    );
   }
 
   @Command('buttonemoji')
