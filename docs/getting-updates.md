@@ -1,17 +1,22 @@
-# Getting updates
+# Receiving updates
+
+`TelegrafModule.forRoot()` starts long polling by default. Set
+`launchOptions: false` in tests or other environments where the bot must not
+connect to Telegram.
+
 ## Long polling
 
-By default, the bot receives updates using long-polling and requires no additional action.
+Long polling needs no additional web server configuration.
 
 ### Recovery after a polling conflict
 
-`telegraf-hardened` can retry long-polling after an HTTP 409 conflict. This is
+`telegraf-hardened` can retry long polling after an HTTP 409 conflict. This is
 useful when an application restarts before Telegram has released the previous
 polling connection:
 
-```typescript
+```ts
 TelegrafModule.forRoot({
-  token: 'TELEGRAM_BOT_TOKEN',
+  token: process.env.TELEGRAM_BOT_TOKEN!,
   launchOptions: {
     polling: {
       retryOnConflict: true,
@@ -22,34 +27,37 @@ TelegrafModule.forRoot({
 
 ## Webhooks
 
-If you want to configure a telegram bot webhook, you need to get a middleware via `getBotToken` helper in your `main.ts` file.
+For webhooks, obtain the Telegraf instance in `main.ts` with `getBotToken()`:
 
-To access it, you must use the `app.get()` method, followed by the provider reference:
-```typescript
+```ts
 import { getBotToken } from 'nestjs-telega';
 
-// ...
 const bot = app.get(getBotToken());
 ```
 
-Now you can connect middleware:
-```typescript
+Attach Telegraf's webhook middleware to your HTTP adapter:
+
+```ts
 app.use(bot.webhookCallback('/secret-path'));
 ```
 
-The last step is to specify launchOptions in `forRoot` method:
-```typescript
+Configure the same path and public domain in `launchOptions`:
+
+```ts
 TelegrafModule.forRootAsync({
   imports: [ConfigModule],
   useFactory: (configService: ConfigService) => ({
-    token: configService.get<string>('TELEGRAM_BOT_TOKEN'),
+    token: configService.getOrThrow<string>('TELEGRAM_BOT_TOKEN'),
     launchOptions: {
       webhook: {
-        domain: 'domain.tld',
+        domain: 'https://example.com',
         path: '/secret-path',
-      }
-    }
+      },
+    },
   }),
   inject: [ConfigService],
 });
 ```
+
+Use HTTPS in production and ensure that Telegram can reach the configured
+domain. For a named bot, pass the same name to `getBotToken('name')`.

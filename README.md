@@ -33,6 +33,10 @@ guards, interceptors, filters and pipes.
 npm install nestjs-telega@telegraf telegraf
 ```
 
+```bash
+yarn add nestjs-telega@telegraf telegraf
+```
+
 Always include `@telegraf` for the current
 [Telegraf](https://github.com/telegraf/telegraf)-based release line.
 `telegraf` is a peer dependency and must be installed by the application.
@@ -46,6 +50,10 @@ first stable `1.0.0` release:
 
 ```bash
 npm install nestjs-telega telegraf-hardened
+```
+
+```bash
+yarn add nestjs-telega telegraf-hardened
 ```
 
 ## Quick start

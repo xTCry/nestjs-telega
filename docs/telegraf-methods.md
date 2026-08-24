@@ -1,24 +1,21 @@
-# Telegraf methods
-Each [telegraf-hardened](https://github.com/telegraf-hardened/telegraf-hardened)
-instance method has own decorator in `nestjs-telega` package. The name of the
-decorator corresponds to the name of the framework method. For example
-`@Hears`, `@On`, `@Action` and so on.
+# Decorators and listener results
 
-Now let's try simple example:
+`nestjs-telega` exposes class decorators for update providers and method
+decorators that correspond to [telegraf-hardened](https://github.com/telegraf-hardened/telegraf-hardened)
+Composer methods: `@Command`, `@On`, `@Hears`, `@Action`, `@InlineQuery` and
+others. Both unprefixed names and `Tg*` aliases are available. Prefer `Tg*`
+when an application combines decorators from several bot transports.
 
-```typescript title="src/app.update.ts"
+```ts title="src/app.update.ts"
 import {
-  BusinessConnection,
-  BusinessMessage,
-  Update,
   Ctx,
-  Start,
   Help,
   On,
   Hears,
+  Start,
+  Update,
 } from 'nestjs-telega';
 import type { Context } from 'telegraf-hardened';
-import type { Update as TelegramUpdate } from 'telegraf-hardened/types';
 
 @Update()
 export class AppUpdate {
@@ -55,28 +52,26 @@ decorator's JSDoc also links to the appropriate type.
 | `@Ctx()` | `Context` or your extended context interface |
 | `@Message()` | `Message` from `telegraf-hardened/types` |
 | `@Sender()` | `User` from `telegraf-hardened/types` |
-| `@BusinessConnection()` | `BusinessConnection` from `telegraf-hardened/types` |
-| `@BusinessMessage()` | `Update.BusinessMessageUpdate['business_message']` |
-| `@EditedBusinessMessage()` | `Update.EditedBusinessMessageUpdate['edited_business_message']` |
-| `@DeletedBusinessMessages()` | `BusinessMessagesDeleted` from `telegraf-hardened/types` |
-| `@MessageReaction()` | `MessageReactionUpdated` from `telegraf-hardened/types` |
-| `@MessageReactionCount()` | `MessageReactionCountUpdated` from `telegraf-hardened/types` |
+| `@Next()` | `MiddlewareFn<Context>` next callback from `telegraf-hardened` |
 
-For example, a Telegram Business handler can avoid manually reading fields from
-`ctx`:
+## Reply results
+
+A listener may return a string or `TelegrafListenerResult`. Strings are sent
+as replies. Use the object form to provide Telegraf reply options; class-level
+and method-level `@ReplyOptions()` values are merged with the result.
 
 ```ts
-import { BusinessMessage, On, Update } from 'nestjs-telega';
-import type { Update as TelegramUpdate } from 'telegraf-hardened/types';
+import { Command, ReplyOptions, TelegrafListenerResult, Update } from 'nestjs-telega';
 
 @Update()
-export class BusinessUpdate {
-  @On('business_message')
-  onMessage(
-    @BusinessMessage()
-    message: TelegramUpdate.BusinessMessageUpdate['business_message'],
-  ): void {
-    console.log(message.business_connection_id);
+@ReplyOptions({ parse_mode: 'HTML' })
+export class HelpUpdate {
+  @Command('help')
+  onHelp(): TelegrafListenerResult {
+    return {
+      text: '<b>Commands</b>\n/start — open the bot',
+      extra: { disable_notification: true },
+    };
   }
 }
 ```

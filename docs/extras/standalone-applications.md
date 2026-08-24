@@ -1,21 +1,23 @@
 # Standalone applications
-If you initialized your application with the [Nest CLI](https://docs.nestjs.com/cli/overview), [Express](https://expressjs.com/) framework will be installed by default along with Nest. Nest and NestJS Telegraf does not require Express for work. So if you don't plan to getting bot updates through webhooks, and you don't need a web server, you can remove Express. 
 
-To do this, change the `bootstrap` function in the `main.ts` file of your project on something like that:
-```typescript
+If the application uses long polling only, NestJS does not need an HTTP server.
+Create a standalone application context instead of an Express application:
+
+```ts
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
 }
 bootstrap();
 ```
 
-This initializes Nest as a **standalone application** (without any network listeners).
+This starts Nest without network listeners. Do not use this setup for webhooks.
 
-All that remains is to remove unused dependencies:
+After confirming that nothing else needs Express, remove its unused packages:
+
 ```bash
 npm un @nestjs/platform-express @types/express
 ```
 
 :::info
-More information about standalone applications located at [Nest documentation](https://docs.nestjs.com/standalone-applications)
+See the [Nest standalone applications documentation](https://docs.nestjs.com/standalone-applications).
 :::

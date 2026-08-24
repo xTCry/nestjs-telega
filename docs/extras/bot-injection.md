@@ -1,30 +1,34 @@
 # Bot injection
-At times you may need to access the native `Telegraf` instance. You can inject the Telegraf by using the `@InjectBot()` decorator as follows:
+Inject the native `Telegraf` instance with `@InjectBot()` when a provider needs
+Telegram API methods directly:
 
-```typescript {8} title="src/echo/echo.service.ts"
+```ts title="src/echo/echo.service.ts"
 import { Injectable } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telega';
 import { Telegraf } from 'telegraf-hardened';
-import { TelegrafContext } from '../common/interfaces/telegraf-context.interface.ts';
+
+import type { TelegrafContext } from '../common/interfaces/telegraf-context.interface';
 
 @Injectable()
 export class EchoService {
-  constructor(@InjectBot() private bot: Telegraf<TelegrafContext>) {}
-  ...
+  constructor(@InjectBot() private readonly bot: Telegraf<TelegrafContext>) {}
 }
 ```
 
-If you run [multiple bots](/extras/multiple-bots) in the same application, explicitly specify the bot name:
+If you run [multiple bots](/extras/multiple-bots), explicitly specify the bot
+name:
 
-```typescript {8} title="src/echo/echo.service.ts"
+```ts title="src/echo/echo.service.ts"
 import { Injectable } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telega';
 import { Telegraf } from 'telegraf-hardened';
-import { TelegrafContext } from '../common/interfaces/telegraf-context.interface.ts';
+
+import type { TelegrafContext } from '../common/interfaces/telegraf-context.interface';
 
 @Injectable()
 export class EchoService {
-  constructor(@InjectBot('cats') private bot: Telegraf<TelegrafContext>) {}
-  ...
+  constructor(
+    @InjectBot('cats') private readonly catBot: Telegraf<TelegrafContext>,
+  ) {}
 }
 ```

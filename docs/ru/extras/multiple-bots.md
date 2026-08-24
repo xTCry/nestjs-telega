@@ -1,8 +1,8 @@
-# Multiple bots
+# Несколько ботов
 
-Register each instance with a unique `botName`. Every named bot receives its
-own Telegraf instance, options, scene stage, listener explorer and shutdown
-hook.
+Регистрируйте каждый instance с уникальным `botName`. У каждого именованного
+bot свой экземпляр Telegraf, параметры, stage сцен, listener explorer и
+shutdown hook.
 
 ```ts
 import { Module } from '@nestjs/common';
@@ -34,10 +34,11 @@ export class AppModule {}
 ```
 
 :::warning
-Only one default bot may be registered. Named bots must not reuse a name.
+Допускается только один default bot. У именованных bot не должны повторяться
+имена.
 :::
 
-Inject a named bot with `@InjectBot('name')`:
+Внедрите именованный bot через `@InjectBot('name')`:
 
 ```ts
 import { Injectable } from '@nestjs/common';
@@ -46,24 +47,22 @@ import { Context, Telegraf } from 'telegraf-hardened';
 
 @Injectable()
 export class EchoService {
-  constructor(@InjectBot('cat') private catBot: Telegraf<Context>) {}
+  constructor(@InjectBot('cat') private readonly catBot: Telegraf<Context>) {}
 }
 ```
 
-For a factory provider, use `getBotToken('name')`:
+В factory provider используйте `getBotToken('name')`:
 
 ```ts
 {
   provide: CatsService,
-  useFactory: (catBot: Telegraf<Context>) => {
-    return new CatsService(catBot);
-  },
+  useFactory: (catBot: Telegraf<Context>) => new CatsService(catBot),
   inject: [getBotToken('cat')],
 }
 ```
 
-By default the module discovers handlers throughout the application. Limit
-discovery to selected modules with `include`:
+По умолчанию модуль находит handlers во всём приложении. Ограничить discovery
+выбранными модулями позволяет `include`:
 
 ```ts
 TelegrafModule.forRootAsync({
@@ -74,5 +73,5 @@ TelegrafModule.forRootAsync({
     include: [CatsModule],
   }),
   inject: [ConfigService],
-}),
+});
 ```
