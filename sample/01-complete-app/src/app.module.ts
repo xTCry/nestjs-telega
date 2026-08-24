@@ -1,47 +1,56 @@
 import { Module } from '@nestjs/common';
 import { TelegrafModule } from 'nestjs-telega';
 
-import { GreeterBotName, NotifierBotName } from './app.constants';
+import { BusinessBotName } from './app.constants';
+import { BusinessModule } from './business/business.module';
 import { EchoModule } from './echo/echo.module';
-import { GreeterModule } from './greeter/greeter.module';
 import { sessionMiddleware } from './middleware/session.middleware';
-import { NotifierModule } from './notifier/notifier.module';
+
+const businessBotToken = process.env.BUSINESS_BOT_TOKEN?.trim();
+const apiRoot = process.env.TELEGRAM_API_ROOT?.trim() || undefined;
 
 @Module({
   imports: [
     TelegrafModule.forRoot({
-      token: process.env.ECHO_BOT_TOKEN,
+      token: process.env.BOT_TOKEN ?? '',
+      launchOptions: {
+        allowedUpdates: ['message', 'business_connection', 'callback_query'],
+        polling: {
+          retryOnConflict: true,
+        },
+      },
+      options: { telegram: { apiRoot } },
+      middlewaresBefore: [sessionMiddleware],
       include: [EchoModule],
     }),
-    TelegrafModule.forRootAsync({
-      botName: GreeterBotName,
-      useFactory: () => ({
-        token: process.env.GREETER_BOT_TOKEN,
-        launchOptions: {
-          allowedUpdates: [
-            'message',
-            'inline_query',
-            'message_reaction',
-            'business_message',
-          ],
-          polling: {
-            retryOnConflict: true,
-          },
-        },
-        middlewaresBefore: [sessionMiddleware],
-        include: [GreeterModule],
-      }),
-    }),
-    TelegrafModule.forRootAsync({
-      botName: NotifierBotName,
-      useFactory: () => ({
-        token: process.env.NOTIFIER_BOT_TOKEN,
-        include: [NotifierModule],
-      }),
-    }),
+    ...(businessBotToken
+      ? [
+          TelegrafModule.forRoot({
+            botName: BusinessBotName,
+            token: businessBotToken,
+            launchOptions: {
+              allowedUpdates: [
+                'message',
+                'callback_query',
+                'business_connection',
+                'business_message',
+                'edited_business_message',
+                'deleted_business_messages',
+                'message_reaction',
+                'message_reaction_count',
+              ],
+              polling: {
+                retryOnConflict: true,
+              },
+            },
+            options: { telegram: { apiRoot } },
+            middlewaresBefore: [sessionMiddleware],
+            include: [BusinessModule],
+          }),
+          BusinessModule,
+        ]
+      : []),
     EchoModule,
-    GreeterModule,
-    NotifierModule,
   ],
 })
 export class AppModule {}

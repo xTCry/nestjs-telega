@@ -48,6 +48,8 @@
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "build:sample": "tsc -p sample/01-complete-app/tsconfig.build.json",
+    "start:sample": "npm --prefix sample/01-complete-app run start -- --no-shell",
+    "start:sample:dev": "npm --prefix sample/01-complete-app run start:dev -- --no-shell",
     "format": "prettier --write \"lib/**/*.ts\" \"test/**/*.ts\" \"scripts/**/*.js\"",
     "format:check": "prettier --check \"lib/**/*.ts\" \"test/**/*.ts\" \"scripts/**/*.js\"",
     "format:sample": "prettier --config .prettierrc --write \"sample/*/src/**/*.ts\"",

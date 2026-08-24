@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 
-import { RandomNumberScene } from '../greeter/scenes/random-number.scene';
+import { AdminResponseWizard } from '../admin/admin-response.wizard';
+import { BusinessResponsesModule } from '../business-responses/business-responses.module';
+import { BotCommandsService } from '../common/services/bot-commands.service';
 import { EchoService } from './echo.service';
 import { EchoUpdate } from './echo.update';
 
 @Module({
-  providers: [EchoUpdate, EchoService, RandomNumberScene],
+  imports: [BusinessResponsesModule],
+  providers: [EchoUpdate, EchoService, AdminResponseWizard, BotCommandsService],
 })
 export class EchoModule {}
