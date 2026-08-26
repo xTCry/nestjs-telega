@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.0.0-rc.1](https://github.com/xTCry/nestjs-telega/compare/v0.1.0...v1.0.0-rc.1) (2026-08-26)
+
+### ⚠ BREAKING CHANGES
+
+* **core:** migrate to `telegraf-hardened`
+
+### 🧹 Chore
+
+* **release:** prepare hardened release workflow ([815a190](https://github.com/xTCry/nestjs-telega/commit/815a190d715fc8ab7501e103d7bae1654bb6fce0))
+
+### 🚀 Features
+
+* **core:** migrate to `telegraf-hardened` ([b1a794c](https://github.com/xTCry/nestjs-telega/commit/b1a794c68311fd08766fed20cce60fc660bdff84))
+* **decorators:** add business and reaction parameter decorators ([a9ed48e](https://github.com/xTCry/nestjs-telega/commit/a9ed48e45e8a3fe121d0a1bf9d0db49be6bc7485))
+* **hardened:** add reaction decorator and expand sample coverage ([03ea61f](https://github.com/xTCry/nestjs-telega/commit/03ea61f298818b3d8293668424d9396d0f544a92))
+* **results:** support callback feedback for declarative ui actions ([f3ebc9d](https://github.com/xTCry/nestjs-telega/commit/f3ebc9da456d34d903f75e01ff8bad29c9b4b6f5))
+* **results:** support declarative callback message actions ([626e9e5](https://github.com/xTCry/nestjs-telega/commit/626e9e57701c27534e061ebcf03209dc5ce51e7d))
+* **results:** support declarative media message edits ([90888b8](https://github.com/xTCry/nestjs-telega/commit/90888b869e3555d69d951263ba645cc54500339c))
+* **sample:** add configurable telegram business bot workflow ([528c7ac](https://github.com/xTCry/nestjs-telega/commit/528c7acf9e68420e6bfec010af7fda4013fd2280))
+
+### 📖 Documentation
+
+* document telegraf and hardened release lines ([515cae7](https://github.com/xTCry/nestjs-telega/commit/515cae7e2f68a725f8206d8c1bf04dfbf7ae24d7))
+* **site:** add ru localization and refresh guides ([bd68e08](https://github.com/xTCry/nestjs-telega/commit/bd68e08c1c25ac0366aa1ade2d515f8a41355563))
+* update telegraf release installation ([e8971dc](https://github.com/xTCry/nestjs-telega/commit/e8971dce9a8e7acc3b9b25d7c32f7436b8c7ffce))
+
+### 🌟 Samples
+
+* improve admin response management flow ([a891233](https://github.com/xTCry/nestjs-telega/commit/a891233f978ea0cfc11653fda63ab36f1964bb93))
+* **inline:** demonstrate paginated cached inline queries ([b8eb47b](https://github.com/xTCry/nestjs-telega/commit/b8eb47bdc92443acf5e8afadd30b67f966295f5e))
+
 ## 0.1.0 (2026-08-21)
 
 ### 🧹 Chore
