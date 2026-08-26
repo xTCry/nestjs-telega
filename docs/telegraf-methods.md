@@ -123,3 +123,30 @@ and a message. A UI result automatically acknowledges the callback query; add
 the optional `callbackQuery` property, as in the example, to show a custom
 toast or alert. The library silently ignores these result variants for an
 incompatible update, just like callback and inline-query response results.
+
+For callback buttons attached to a media message, the same result contract also
+supports its caption and media:
+
+```ts
+return {
+  editMessageCaption: {
+    caption: '<b>Updated caption</b>',
+    extra: { parse_mode: 'HTML' },
+  },
+};
+
+return {
+  editMessageMedia: {
+    media: {
+      type: 'photo',
+      media: 'FILE_ID_OR_URL',
+      caption: 'Replacement photo',
+    },
+  },
+};
+```
+
+These actions use Telegraf's context-aware edit methods, so they only target
+the message associated with the current callback or inline query. To edit an
+arbitrary message, call `ctx.telegram.editMessageCaption()` or
+`ctx.telegram.editMessageMedia()` directly with its chat and message IDs.

@@ -38,6 +38,24 @@ export interface TelegrafEditMessageResponse extends TelegrafCallbackUiResult {
   };
 }
 
+/** Результат, который изменяет caption текущего callback-сообщения. */
+export interface TelegrafEditMessageCaptionResponse
+  extends TelegrafCallbackUiResult {
+  editMessageCaption: {
+    caption: Parameters<Context['editMessageCaption']>[0];
+    extra?: Parameters<Context['editMessageCaption']>[1];
+  };
+}
+
+/** Результат, который заменяет media текущего callback-сообщения. */
+export interface TelegrafEditMessageMediaResponse
+  extends TelegrafCallbackUiResult {
+  editMessageMedia: {
+    media: Parameters<Context['editMessageMedia']>[0];
+    extra?: Parameters<Context['editMessageMedia']>[1];
+  };
+}
+
 /** Результат, который изменяет inline keyboard текущего callback-сообщения. */
 export interface TelegrafEditReplyMarkupResponse
   extends TelegrafCallbackUiResult {
@@ -57,6 +75,8 @@ export type TelegrafListenerResult =
   | TelegrafCallbackQueryResponse
   | TelegrafInlineQueryResponse
   | TelegrafEditMessageResponse
+  | TelegrafEditMessageCaptionResponse
+  | TelegrafEditMessageMediaResponse
   | TelegrafEditReplyMarkupResponse
   | TelegrafDeleteMessageResponse
   | false

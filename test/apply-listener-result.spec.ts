@@ -154,6 +154,60 @@ describe('applyListenerResult', () => {
     expect(answerCbQuery).toHaveBeenCalledWith();
   });
 
+  it('edits a caption associated with a callback result', async () => {
+    const editMessageCaption = jest.fn().mockResolvedValue(true);
+    const answerCbQuery = jest.fn().mockResolvedValue(undefined);
+
+    await applyListenerResult(
+      {
+        callbackQuery: { id: 'callback-id' },
+        editMessageCaption,
+        answerCbQuery,
+      } as unknown as Context,
+      {
+        editMessageCaption: {
+          caption: '<b>Updated caption</b>',
+          extra: { parse_mode: 'HTML' },
+        },
+      },
+      {},
+    );
+
+    expect(editMessageCaption).toHaveBeenCalledWith('<b>Updated caption</b>', {
+      parse_mode: 'HTML',
+    });
+    expect(answerCbQuery).toHaveBeenCalledWith();
+  });
+
+  it('edits media associated with a callback result', async () => {
+    const editMessageMedia = jest.fn().mockResolvedValue(true);
+    const answerCbQuery = jest.fn().mockResolvedValue(undefined);
+    const media = {
+      type: 'photo' as const,
+      media: 'https://example.com/updated.jpg',
+    };
+
+    await applyListenerResult(
+      {
+        callbackQuery: { id: 'callback-id' },
+        editMessageMedia,
+        answerCbQuery,
+      } as unknown as Context,
+      {
+        editMessageMedia: {
+          media,
+          extra: { reply_markup: { inline_keyboard: [] } },
+        },
+      },
+      {},
+    );
+
+    expect(editMessageMedia).toHaveBeenCalledWith(media, {
+      reply_markup: { inline_keyboard: [] },
+    });
+    expect(answerCbQuery).toHaveBeenCalledWith();
+  });
+
   it('deletes the message associated with a callback result', async () => {
     const deleteMessage = jest.fn().mockResolvedValue(true);
     const answerCbQuery = jest.fn().mockResolvedValue(undefined);
@@ -176,6 +230,8 @@ describe('applyListenerResult', () => {
 
   it('does not apply a message UI result outside a compatible update', async () => {
     const editMessageText = jest.fn();
+    const editMessageCaption = jest.fn();
+    const editMessageMedia = jest.fn();
     const editMessageReplyMarkup = jest.fn();
     const deleteMessage = jest.fn();
 
@@ -190,12 +246,24 @@ describe('applyListenerResult', () => {
       {},
     );
     await applyListenerResult(
+      { editMessageCaption } as unknown as Context,
+      { editMessageCaption: { caption: 'Updated' } },
+      {},
+    );
+    await applyListenerResult(
+      { editMessageMedia } as unknown as Context,
+      { editMessageMedia: { media: { type: 'photo', media: 'file-id' } } },
+      {},
+    );
+    await applyListenerResult(
       { deleteMessage, msgId: undefined } as unknown as Context,
       { deleteMessage: true },
       {},
     );
 
     expect(editMessageText).not.toHaveBeenCalled();
+    expect(editMessageCaption).not.toHaveBeenCalled();
+    expect(editMessageMedia).not.toHaveBeenCalled();
     expect(editMessageReplyMarkup).not.toHaveBeenCalled();
     expect(deleteMessage).not.toHaveBeenCalled();
   });

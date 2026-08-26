@@ -122,3 +122,30 @@ export class SettingsUpdate {
 message. Чтобы показать собственный toast или alert, добавьте необязательное
 поле `callbackQuery`, как в примере. Для несовместимого update библиотека
 безопасно пропускает такой результат.
+
+Для callback-кнопок на media-сообщении этот же контракт поддерживает изменение
+caption и самого media:
+
+```ts
+return {
+  editMessageCaption: {
+    caption: '<b>Обновлённый caption</b>',
+    extra: { parse_mode: 'HTML' },
+  },
+};
+
+return {
+  editMessageMedia: {
+    media: {
+      type: 'photo',
+      media: 'FILE_ID_OR_URL',
+      caption: 'Новое фото',
+    },
+  },
+};
+```
+
+Эти действия используют context-aware методы Telegraf и поэтому затрагивают
+только сообщение текущего callback или inline query. Чтобы изменить произвольное
+сообщение, вызовите `ctx.telegram.editMessageCaption()` или
+`ctx.telegram.editMessageMedia()` напрямую с его chat и message ID.

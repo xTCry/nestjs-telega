@@ -4,6 +4,8 @@ import type {
   TelegrafCallbackQueryResponse,
   TelegrafCallbackUiResult,
   TelegrafDeleteMessageResponse,
+  TelegrafEditMessageCaptionResponse,
+  TelegrafEditMessageMediaResponse,
   TelegrafEditMessageResponse,
   TelegrafEditReplyMarkupResponse,
   TelegrafInlineQueryResponse,
@@ -20,6 +22,16 @@ export async function applyListenerResult(
 ): Promise<void> {
   if (isTelegrafEditMessageResponse(result)) {
     await applyEditMessageResult(ctx, result);
+    return;
+  }
+
+  if (isTelegrafEditMessageCaptionResponse(result)) {
+    await applyEditMessageCaptionResult(ctx, result);
+    return;
+  }
+
+  if (isTelegrafEditMessageMediaResponse(result)) {
+    await applyEditMessageMediaResult(ctx, result);
     return;
   }
 
@@ -110,6 +122,36 @@ async function applyEditMessageResult(
   }
 
   await ctx.editMessageText(result.editMessage.text, result.editMessage.extra);
+  await answerCallbackQueryAfterUiAction(ctx, result);
+}
+
+async function applyEditMessageCaptionResult(
+  ctx: Context,
+  result: TelegrafEditMessageCaptionResponse,
+): Promise<void> {
+  if (!canEditCurrentMessage(ctx)) {
+    return;
+  }
+
+  await ctx.editMessageCaption(
+    result.editMessageCaption.caption,
+    result.editMessageCaption.extra,
+  );
+  await answerCallbackQueryAfterUiAction(ctx, result);
+}
+
+async function applyEditMessageMediaResult(
+  ctx: Context,
+  result: TelegrafEditMessageMediaResponse,
+): Promise<void> {
+  if (!canEditCurrentMessage(ctx)) {
+    return;
+  }
+
+  await ctx.editMessageMedia(
+    result.editMessageMedia.media,
+    result.editMessageMedia.extra,
+  );
   await answerCallbackQueryAfterUiAction(ctx, result);
 }
 
@@ -221,6 +263,22 @@ function isTelegrafEditMessageResponse(
   value: TelegrafListenerResult,
 ): value is TelegrafEditMessageResponse {
   return typeof value === 'object' && value !== null && 'editMessage' in value;
+}
+
+function isTelegrafEditMessageCaptionResponse(
+  value: TelegrafListenerResult,
+): value is TelegrafEditMessageCaptionResponse {
+  return (
+    typeof value === 'object' && value !== null && 'editMessageCaption' in value
+  );
+}
+
+function isTelegrafEditMessageMediaResponse(
+  value: TelegrafListenerResult,
+): value is TelegrafEditMessageMediaResponse {
+  return (
+    typeof value === 'object' && value !== null && 'editMessageMedia' in value
+  );
 }
 
 function isTelegrafEditReplyMarkupResponse(
