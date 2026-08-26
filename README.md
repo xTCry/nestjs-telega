@@ -45,8 +45,7 @@ Always include `@telegraf` for the current
 
 The code in `main` uses
 [telegraf-hardened](https://github.com/telegraf-hardened/telegraf-hardened)
-and requires Node.js 18 or newer. It will be published as `latest` with the
-first stable `1.0.0` release:
+and requires Node.js 18 or newer:
 
 ```bash
 npm install nestjs-telega telegraf-hardened

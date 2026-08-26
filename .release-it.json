@@ -2,7 +2,7 @@
   "git": {
     "commitMessage": "chore: release v${version}",
     "tagName": "v${version}",
-    "requireCleanWorkingDir": false
+    "requireCleanWorkingDir": true
   },
   "github": {
     "release": true,
@@ -17,9 +17,6 @@
       "infile": "CHANGELOG.md",
       "header": "# Changelog",
       "whatBump": false,
-      "gitRawCommitsOpts": {
-        "from": "c9e43f765583dba4425779021b3df3141152935e"
-      },
       "preset": {
         "name": "conventionalcommits",
         "types": [
