@@ -14,7 +14,12 @@ const apiRoot = process.env.TELEGRAM_API_ROOT?.trim() || undefined;
     TelegrafModule.forRoot({
       token: process.env.BOT_TOKEN ?? '',
       launchOptions: {
-        allowedUpdates: ['message', 'business_connection', 'callback_query'],
+        allowedUpdates: [
+          'message',
+          'business_connection',
+          'callback_query',
+          'inline_query',
+        ],
         polling: {
           retryOnConflict: true,
         },

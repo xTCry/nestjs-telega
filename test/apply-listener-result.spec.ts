@@ -95,12 +95,23 @@ describe('applyListenerResult', () => {
         inlineQuery: { id: 'inline-id' },
         answerInlineQuery,
       } as unknown as Context,
-      { inlineQuery: { results, extra: { cache_time: 10 } } },
+      {
+        inlineQuery: {
+          results,
+          extra: {
+            cache_time: 10,
+            is_personal: true,
+            next_offset: 'next-page',
+          },
+        },
+      },
       {},
     );
 
     expect(answerInlineQuery).toHaveBeenCalledWith(results, {
       cache_time: 10,
+      is_personal: true,
+      next_offset: 'next-page',
     });
   });
 

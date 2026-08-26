@@ -150,3 +150,35 @@ These actions use Telegraf's context-aware edit methods, so they only target
 the message associated with the current callback or inline query. To edit an
 arbitrary message, call `ctx.telegram.editMessageCaption()` or
 `ctx.telegram.editMessageMedia()` directly with its chat and message IDs.
+
+## Inline-query pagination and cache
+
+`inlineQuery.extra` is passed directly to Telegraf's `answerInlineQuery()`.
+Use Telegram's `next_offset` for pagination and choose a cache policy that
+matches whether the result is public or user-specific:
+
+```ts
+@InlineQuery(/.*/)
+onInlineQuery(@Ctx() ctx: Context): TelegrafListenerResult {
+  const page = Number(ctx.inlineQuery?.offset || '0') || 0;
+  const query = ctx.inlineQuery?.query.trim() || '';
+
+  return {
+    inlineQuery: {
+      results: createSearchResults(query, page),
+      extra: {
+        next_offset: String(page + 1),
+        // Longer cache for a static empty-query catalogue.
+        cache_time: query ? 30 : 300,
+        // Set true when a result depends on the Telegram user.
+        is_personal: false,
+      },
+    },
+  };
+}
+```
+
+There is deliberately no library-level “auto cache” mode: only an application
+knows how volatile its data is and whether it is safe to share between users.
+Telegram can return at most 50 results per response; use a stable offset format
+and return an empty `next_offset` when there are no more pages.

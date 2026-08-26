@@ -149,3 +149,36 @@ return {
 только сообщение текущего callback или inline query. Чтобы изменить произвольное
 сообщение, вызовите `ctx.telegram.editMessageCaption()` или
 `ctx.telegram.editMessageMedia()` напрямую с его chat и message ID.
+
+## Pagination и cache inline query
+
+`inlineQuery.extra` без изменений передаётся в `answerInlineQuery()` Telegraf.
+Для pagination используйте Telegram-поле `next_offset`, а cache-политику
+выбирайте исходя из того, публичен результат или зависит от пользователя:
+
+```ts
+@InlineQuery(/.*/)
+onInlineQuery(@Ctx() ctx: Context): TelegrafListenerResult {
+  const page = Number(ctx.inlineQuery?.offset || '0') || 0;
+  const query = ctx.inlineQuery?.query.trim() || '';
+
+  return {
+    inlineQuery: {
+      results: createSearchResults(query, page),
+      extra: {
+        next_offset: String(page + 1),
+        // Для неизменяемого каталога без query допустим более долгий cache.
+        cache_time: query ? 30 : 300,
+        // Укажите true, если результат зависит от Telegram-пользователя.
+        is_personal: false,
+      },
+    },
+  };
+}
+```
+
+Намеренно нет library-level режима «auto cache»: только приложение знает,
+насколько изменчивы его данные и можно ли делиться результатом между
+пользователями. Telegram принимает не больше 50 результатов за ответ;
+используйте стабильный формат offset и верните пустой `next_offset`, когда
+страницы закончились.

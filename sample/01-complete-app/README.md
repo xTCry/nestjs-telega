@@ -25,6 +25,10 @@ account и передаёт ему только разрешённые Business 
   acknowledgement, декларативное редактирование сообщения и клавиатуры, а
   также удаление сообщения.
 - `/features` — список подключённых возможностей telegraf-hardened.
+- Inline mode — включите inline mode для bot через `/setinline` в BotFather,
+  затем напишите `@bot_username запрос` в любом чате. Sample возвращает
+  три страницы по три результата, передаёт `next_offset` и выбирает
+  `cache_time` в зависимости от того, пустой запрос или нет.
 - `/admin` — панель администратора. Доступна только ID из `ADMIN_IDS`.
   Здесь можно включать/выключать automatic replies, добавлять text/sticker/
   reaction и посмотреть сохранённые значения. Callback-кнопки обновляют одно
@@ -98,7 +102,10 @@ telegraf-hardened.
 
 ### Команды для ручной проверки
 
-- Основной bot: `/format`, `/keyboard`, `/menu`, `/admin` и текстовое сообщение.
+- Основной bot: `/format`, `/keyboard`, `/menu`, `/admin`, inline query и
+  текстовое сообщение. Для inline query сначала включите режим через
+  `/setinline` в BotFather, затем используйте `@bot_username запрос`: scrolling
+  проверяет pagination через `next_offset`, а повторный поиск — Telegram cache.
   В `/keyboard` нажмите `Acknowledge`, затем `Edit message`; новая клавиатура
   позволяет проверить декларативные `editMessage`, `editReplyMarkup` и
   `deleteMessage` listener results.

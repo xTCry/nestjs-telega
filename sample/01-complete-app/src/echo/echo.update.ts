@@ -5,6 +5,7 @@ import {
   Ctx,
   Help,
   InjectBot,
+  InlineQuery,
   Message,
   On,
   ReplyOptions,
@@ -269,6 +270,52 @@ export class EchoUpdate {
     return { deleteMessage: true };
   }
 
+  @InlineQuery(/.*/)
+  onInlineQuery(@Ctx() ctx: Context): TelegrafListenerResult {
+    const inlineQuery = ctx.inlineQuery;
+    if (!inlineQuery) {
+      return;
+    }
+
+    const page = getInlineQueryPage(inlineQuery.offset);
+    const query = inlineQuery.query.trim();
+    const pageSize = 3;
+    const totalPages = 3;
+    const results = Array.from(
+      { length: page < totalPages ? pageSize : 0 },
+      (_, index) => {
+        const number = page * pageSize + index + 1;
+        const title = query
+          ? `Result ${number} for “${query}”`
+          : `Sample inline result ${number}`;
+
+        return {
+          type: 'article' as const,
+          id: `echo:${page}:${index}`,
+          title,
+          description: 'Paginated result from the NestJS Telega sample.',
+          input_message_content: {
+            message_text: `${title}\n\nSent from inline mode.`,
+          },
+        };
+      },
+    );
+
+    return {
+      inlineQuery: {
+        results,
+        extra: {
+          // Пустой каталог не меняется и может кэшироваться дольше.
+          cache_time: query ? 30 : 300,
+          // В этом демо результат зависит только от query, а не от пользователя.
+          is_personal: false,
+          // Пустой offset останавливает pagination после последней страницы.
+          next_offset: page + 1 < totalPages ? String(page + 1) : '',
+        },
+      },
+    };
+  }
+
   @On('text')
   onMessage(
     @Message('text', new ReverseTextPipe()) reversedText: string,
@@ -283,4 +330,11 @@ export class EchoUpdate {
     const config = await this.responsesStore.getConfig();
     await renderAdminDashboard(ctx, config, notice);
   }
+}
+
+/** Преобразует Telegram offset в номер страницы и не допускает некорректных значений. */
+function getInlineQueryPage(offset: string): number {
+  const page = Number(offset);
+
+  return Number.isSafeInteger(page) && page >= 0 ? page : 0;
 }
