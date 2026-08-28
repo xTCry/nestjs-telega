@@ -5,9 +5,16 @@ import { BusinessResponsesModule } from '../business-responses/business-response
 import { BotCommandsService } from '../common/services/bot-commands.service';
 import { EchoService } from './echo.service';
 import { EchoUpdate } from './echo.update';
+import { PrivateMessageFallbackUpdate } from './private-message-fallback.update';
 
 @Module({
   imports: [BusinessResponsesModule],
-  providers: [EchoUpdate, EchoService, AdminResponseWizard, BotCommandsService],
+  providers: [
+    EchoUpdate,
+    PrivateMessageFallbackUpdate,
+    EchoService,
+    AdminResponseWizard,
+    BotCommandsService,
+  ],
 })
 export class EchoModule {}

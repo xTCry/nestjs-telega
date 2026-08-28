@@ -3,7 +3,9 @@ import { TelegrafModule } from 'nestjs-telega';
 
 import { BusinessBotName } from './app.constants';
 import { BusinessModule } from './business/business.module';
+import { logListenerRegistration } from './common/listener-diagnostics';
 import { EchoModule } from './echo/echo.module';
+import { GreeterModule } from './greeter/greeter.module';
 import { sessionMiddleware } from './middleware/session.middleware';
 
 const businessBotToken = process.env.BUSINESS_BOT_TOKEN?.trim();
@@ -26,7 +28,10 @@ const apiRoot = process.env.TELEGRAM_API_ROOT?.trim() || undefined;
       },
       options: { telegram: { apiRoot } },
       middlewaresBefore: [sessionMiddleware],
-      include: [EchoModule],
+      include: [EchoModule, GreeterModule],
+      listenerDiagnostics: {
+        onRegistered: logListenerRegistration,
+      },
     }),
     ...(businessBotToken
       ? [
@@ -51,11 +56,15 @@ const apiRoot = process.env.TELEGRAM_API_ROOT?.trim() || undefined;
             options: { telegram: { apiRoot } },
             middlewaresBefore: [sessionMiddleware],
             include: [BusinessModule],
+            listenerDiagnostics: {
+              onRegistered: logListenerRegistration,
+            },
           }),
           BusinessModule,
         ]
       : []),
     EchoModule,
+    GreeterModule,
   ],
 })
 export class AppModule {}

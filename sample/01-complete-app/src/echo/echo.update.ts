@@ -6,7 +6,9 @@ import {
   Help,
   InjectBot,
   InlineQuery,
+  ListenerPriority,
   Message,
+  Next,
   On,
   ReplyOptions,
   Start,
@@ -67,7 +69,7 @@ export class EchoUpdate {
     return {
       text: [
         '<b>What this sample demonstrates</b>',
-        '• Echo replies with Unicode-safe text reversal.',
+        '• Send “echo &lt;text&gt;” for Unicode-safe text reversal; other text reaches the fallback handler.',
         '• /admin opens controls for automatic Business replies: text, stickers and reactions.',
         '• /features, /format, /keyboard and /menu isolate individual telegraf-hardened APIs.',
         '• Set BUSINESS_BOT_TOKEN to activate the second bot for Telegram Business updates and /dialogue.',
@@ -207,10 +209,10 @@ export class EchoUpdate {
   @Command('format')
   async onFormat(@Ctx() ctx: Context): Promise<void> {
     await ctx.reply(
-      Format.join(
+      Format.join([
         Format.bold('Formatted'),
         ' replies are provided by telegraf-hardened.',
-      ),
+      ]),
     );
   }
 
@@ -316,10 +318,18 @@ export class EchoUpdate {
     };
   }
 
+  @ListenerPriority(-10)
   @On('text')
-  onMessage(
-    @Message('text', new ReverseTextPipe()) reversedText: string,
-  ): TelegrafListenerResult {
+  async onMessage(
+    @Message('text') text: string,
+    @Next() next: () => Promise<void>,
+  ): Promise<TelegrafListenerResult> {
+    if (!text.startsWith('echo ')) {
+      await next();
+      return;
+    }
+
+    const reversedText = new ReverseTextPipe().transform(text.slice(5));
     return this.echoService.echo(reversedText);
   }
 

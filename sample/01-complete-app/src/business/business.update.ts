@@ -70,10 +70,10 @@ export class BusinessUpdate {
       if (reply) {
         await ctx.sendChatAction('typing');
         await ctx.reply(
-          Format.join(
+          Format.join([
             reply,
             entityTypes ? `\n\nDetected entities: ${entityTypes}.` : '',
-          ),
+          ]),
         );
       }
       if (reaction) {

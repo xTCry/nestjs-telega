@@ -45,10 +45,10 @@ export class GreeterUpdate {
   @Command('features')
   async onFeatures(@Ctx() ctx: Context): Promise<void> {
     await ctx.reply(
-      Format.join(
+      Format.join([
         Format.bold('telegraf-hardened sample'),
         '\n• reactions\n• business updates\n• Stars and gifts API via /stars and /gifts\n\nUse /help for the full guide.',
-      ),
+      ]),
       Markup.inlineKeyboard([
         Markup.button.switchToCurrentChat('Try inline mode', 'hello'),
       ]),

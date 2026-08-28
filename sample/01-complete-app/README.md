@@ -18,8 +18,9 @@ account и передаёт ему только разрешённые Business 
 `setMyCommands`. Достаточно открыть чат с основным bot и отправить `/start`.
 
 - `/help` — краткая карта возможностей sample.
-- Любой текст — Unicode-safe echo: emoji не превращаются в повреждённые
-  символы при развороте строки.
+- `echo <текст>` — приоритетный Unicode-safe echo: emoji не превращаются в
+  повреждённые символы при развороте строки. Другой текст дойдёт до общего
+  fallback handler-а.
 - `/format`, `/keyboard`, `/menu` — форматированный текст, inline и reply
   keyboards соответственно. В `/keyboard` кнопки демонстрируют callback
   acknowledgement, декларативное редактирование сообщения и клавиатуры, а
@@ -95,6 +96,13 @@ telegraf-hardened.
 чтобы telegraf-hardened повторял long-polling после HTTP 409 при быстром
 перезапуске приложения.
 
+При запуске основной bot также выводит `ListenerDiagnostics`: отсортированный
+список зарегистрированных `@Update()` listener-ов. В нём видно, что
+`EchoUpdate.onMessage` имеет priority `-10`, а
+`PrivateMessageFallbackUpdate.onUnhandledText` — фазу `fallback` и поэтому
+зарегистрирован последним. Лог содержит только metadata listener-а, не token и
+не Telegram update.
+
 Варианты ответов сохраняются в JSON-файл
 `sample/01-complete-app/data/business-responses.json`. Файл создаётся только
 после первого изменения через админ-бота и намеренно не отслеживается Git.
@@ -102,8 +110,9 @@ telegraf-hardened.
 
 ### Команды для ручной проверки
 
-- Основной bot: `/format`, `/keyboard`, `/menu`, `/admin`, inline query и
-  текстовое сообщение. Для inline query сначала включите режим через
+- Основной bot: `/format`, `/keyboard`, `/menu`, `/features`, `/scene`,
+  `/wizard`, `/admin`, inline query, `echo 😁🎉` и произвольное текстовое
+  сообщение для fallback. Для inline query сначала включите режим через
   `/setinline` в BotFather, затем используйте `@bot_username запрос`: scrolling
   проверяет pagination через `next_offset`, а повторный поиск — Telegram cache.
   В `/keyboard` нажмите `Acknowledge`, затем `Edit message`; новая клавиатура
