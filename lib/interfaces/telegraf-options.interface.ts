@@ -5,6 +5,7 @@ import type {
 } from '@nestjs/common/interfaces';
 import type { Context, Middleware, Telegraf } from 'telegraf-hardened';
 
+import type { TelegrafListenerDiagnostics } from './listener-registration-descriptor.interface';
 import type { TelegrafReplyExtra } from './telegraf-listener-result.interface';
 
 export interface TelegrafModuleOptions {
@@ -23,6 +24,11 @@ export interface TelegrafModuleOptions {
   /** Middleware, выполняемые после найденных update-обработчиков. */
   middlewaresAfter?: ReadonlyArray<Middleware<Context>>;
   replyOptions?: TelegrafReplyExtra;
+  /**
+   * Callback, вызываемый после регистрации каждого найденного `@Update()` listener-а.
+   * Не получает bot token или данные Telegram update.
+   */
+  listenerDiagnostics?: TelegrafListenerDiagnostics;
   useCatchLogger?: ((err: Error, ctx?: Context) => void) | false;
 }
 

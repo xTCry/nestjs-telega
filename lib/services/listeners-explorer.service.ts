@@ -20,6 +20,7 @@ import { applyListenerResult } from '../utils';
 import {
   ListenerRegistrarService,
   TelegrafListenerFactory,
+  UpdateListenerProvider,
 } from './listener-registrar.service';
 
 type TelegrafMethod = (...args: unknown[]) => unknown;
@@ -50,6 +51,7 @@ export class ListenersExplorerService implements OnModuleInit {
       metadataScanner,
       this.createReplyingListener.bind(this) as TelegrafListenerFactory,
       botName,
+      telegrafOptions.listenerDiagnostics,
     );
   }
 
@@ -59,12 +61,13 @@ export class ListenersExplorerService implements OnModuleInit {
       { strict: false },
     );
 
-    const providers = this.getProviders(
+    const discoveredProviders = this.getProviders(
       this.getModules(this.telegrafOptions.include ?? []),
     );
+    const providers = discoveredProviders.map(({ wrapper }) => wrapper);
     this.listenerRegistrar.registerBeforeStage(providers, this.stage);
     this.bot.use(this.stage.middleware());
-    this.listenerRegistrar.registerUpdates(providers, this.bot);
+    this.listenerRegistrar.registerUpdates(discoveredProviders, this.bot);
     this.bot.use(...(this.telegrafOptions.middlewaresAfter ?? []));
   }
 
@@ -76,8 +79,8 @@ export class ListenersExplorerService implements OnModuleInit {
   }
 
   /** Исключает повторный discovery одного provider-а в текущем bot instance. */
-  private getProviders(modules: Module[]): InstanceWrapper<object>[] {
-    const providers: InstanceWrapper<object>[] = [];
+  private getProviders(modules: Module[]): UpdateListenerProvider[] {
+    const providers: UpdateListenerProvider[] = [];
     const metatypes = new Set<Function>();
 
     for (const moduleRef of modules) {
@@ -91,7 +94,10 @@ export class ListenersExplorerService implements OnModuleInit {
         }
 
         metatypes.add(wrapper.metatype);
-        providers.push(wrapper as InstanceWrapper<object>);
+        providers.push({
+          wrapper: wrapper as InstanceWrapper<object>,
+          moduleName: moduleRef.metatype?.name ?? 'AnonymousModule',
+        });
       }
     }
 

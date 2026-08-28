@@ -9,6 +9,7 @@ const englishSidebar: DefaultTheme.SidebarItem[] = [
     items: [
       { text: 'Introduction and installation', link: '/' },
       { text: 'Receiving updates', link: '/getting-updates' },
+      { text: 'Listener order', link: '/listener-order' },
       { text: 'Decorators and listener results', link: '/telegraf-methods' },
       { text: 'Scenes and wizards', link: '/scenes' },
       { text: 'Async configuration', link: '/async-configuration' },
@@ -34,6 +35,7 @@ const russianSidebar: DefaultTheme.SidebarItem[] = [
     items: [
       { text: 'Введение и установка', link: '/ru/' },
       { text: 'Получение update-ов', link: '/ru/getting-updates' },
+      { text: 'Порядок listener-ов', link: '/ru/listener-order' },
       {
         text: 'Декораторы и результаты обработчиков',
         link: '/ru/telegraf-methods',

@@ -3,6 +3,7 @@
 [![npm](https://img.shields.io/npm/v/nestjs-telega?style=flat-square)](https://www.npmjs.com/package/nestjs-telega)
 [![npm downloads](https://img.shields.io/npm/dm/nestjs-telega?style=flat-square)](https://www.npmjs.com/package/nestjs-telega)
 [![GitHub last commit](https://img.shields.io/github/last-commit/xtcry/nestjs-telega?style=flat-square)](https://github.com/xtcry/nestjs-telega)
+
 <!-- [![license](https://img.shields.io/npm/l/nestjs-telega?style=flat-square)](LICENSE) -->
 
 <img src="https://nestjs.com/img/logo-small.svg" title="NestJS logotype" align="right" width="95" height="148">
@@ -26,6 +27,7 @@ guards, interceptors, filters and pipes.
 - NestJS guards, interceptors, exception filters and pipes in handlers.
 - Typed parameter decorators and listener return values.
 - Telegraf-hardened middleware before and after discovered handlers.
+- Explicit `@Update()` listener phases and priorities for reliable fallbacks.
 
 ## Install the stable Telegraf line
 
@@ -121,12 +123,52 @@ options include:
 - `middlewaresBefore` and `middlewaresAfter` — telegraf-hardened middleware around
   discovered handlers.
 - `replyOptions` — default reply options for listener return values.
+- `listenerDiagnostics` — optional callback with the actual ordered update-listener
+  registrations, suitable for safe startup diagnostics.
+
+## Listener order and fallbacks
+
+`@Update()` handlers without ordering decorators keep their discovery order.
+For an explicit cross-module order, use `@TgListenerPriority()` (smaller values
+are registered first) and `@TgListenerPhase('fallback')` (registered after all
+normal handlers):
+
+```ts
+import {
+  Next,
+  On,
+  TgListenerPhase,
+  TgListenerPriority,
+  TgUpdate,
+} from 'nestjs-telega';
+
+@TgUpdate()
+export class PrivateMessagesUpdate {
+  @TgListenerPriority(-10)
+  @On('text')
+  async handleKnownText(@Next() next: () => Promise<void>): Promise<void> {
+    await next();
+  }
+
+  @TgListenerPhase('fallback')
+  @On('text')
+  onUnhandledText(): string {
+    return 'I do not understand this message yet.';
+  }
+}
+```
+
+The phase and priority only control registration order; a matching earlier
+handler must still call `next()` for a fallback to receive the update. The
+unprefixed `@ListenerPhase()` and `@ListenerPriority()` aliases are available.
+See the [listener order guide](https://xtcry.github.io/nestjs-telega/listener-order.html)
+for diagnostics and full semantics.
 
 Use `forRootAsync()` when configuration comes from another Nest provider:
 
 ```ts
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TelegrafModule } from 'nestjs-telega';
 
 @Module({

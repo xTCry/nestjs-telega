@@ -4,4 +4,5 @@ export * from './scene.decorator';
 export * from './wizard.decorator';
 export * from './inject-bot.decorator';
 export * from './inject-all-bots.decorator';
+export * from './listener-order.decorator';
 export * from './reply-options.decorator';

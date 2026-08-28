@@ -6,6 +6,8 @@ import {
   Hears,
   InjectAllBots,
   InjectBot,
+  ListenerPhase,
+  ListenerPriority,
   On,
   Scene,
   SceneEnter,
@@ -92,6 +94,15 @@ describe('public decorators', () => {
       { method: 'hears', args: ['Hello'] },
       { method: 'on', args: ['message'] },
     ]);
+  });
+
+  it('validates listener ordering metadata', () => {
+    expect(() => ListenerPriority(Number.NaN)).toThrow(
+      'Listener priority must be a finite number',
+    );
+    expect(() => ListenerPhase('terminal' as never)).toThrow(
+      'Unknown listener phase: terminal',
+    );
   });
 
   it('marks scene lifecycle handlers separately from update listeners', () => {

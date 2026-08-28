@@ -39,8 +39,7 @@ export interface TelegrafEditMessageResponse extends TelegrafCallbackUiResult {
 }
 
 /** Результат, который изменяет caption текущего callback-сообщения. */
-export interface TelegrafEditMessageCaptionResponse
-  extends TelegrafCallbackUiResult {
+export interface TelegrafEditMessageCaptionResponse extends TelegrafCallbackUiResult {
   editMessageCaption: {
     caption: Parameters<Context['editMessageCaption']>[0];
     extra?: Parameters<Context['editMessageCaption']>[1];
@@ -48,8 +47,7 @@ export interface TelegrafEditMessageCaptionResponse
 }
 
 /** Результат, который заменяет media текущего callback-сообщения. */
-export interface TelegrafEditMessageMediaResponse
-  extends TelegrafCallbackUiResult {
+export interface TelegrafEditMessageMediaResponse extends TelegrafCallbackUiResult {
   editMessageMedia: {
     media: Parameters<Context['editMessageMedia']>[0];
     extra?: Parameters<Context['editMessageMedia']>[1];
@@ -57,14 +55,12 @@ export interface TelegrafEditMessageMediaResponse
 }
 
 /** Результат, который изменяет inline keyboard текущего callback-сообщения. */
-export interface TelegrafEditReplyMarkupResponse
-  extends TelegrafCallbackUiResult {
+export interface TelegrafEditReplyMarkupResponse extends TelegrafCallbackUiResult {
   editReplyMarkup: Parameters<Context['editMessageReplyMarkup']>[0];
 }
 
 /** Результат, который удаляет сообщение, связанное с текущим update-ом. */
-export interface TelegrafDeleteMessageResponse
-  extends TelegrafCallbackUiResult {
+export interface TelegrafDeleteMessageResponse extends TelegrafCallbackUiResult {
   deleteMessage: true;
 }
 

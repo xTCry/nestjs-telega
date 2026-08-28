@@ -25,6 +25,8 @@ import {
   Composer as ComposerDecorator,
   Ctx,
   Hears,
+  ListenerPhase,
+  ListenerPriority,
   Message,
   Next,
   On,
@@ -43,6 +45,138 @@ import { TelegrafModule } from '../lib/telegraf.module';
 import { getBotToken } from '../lib/utils';
 
 describe('ListenersExplorerService', () => {
+  it('keeps the discovery order when update listeners have no order metadata', async () => {
+    const calls: string[] = [];
+
+    @Update()
+    class FirstUpdateHandler {
+      @On('message')
+      async onMessage(@Next() next: () => Promise<void>): Promise<void> {
+        calls.push('first');
+        await next();
+      }
+    }
+
+    @Update()
+    class SecondUpdateHandler {
+      @On('message')
+      onMessage(): void {
+        calls.push('second');
+      }
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: '1:test-token',
+          launchOptions: false,
+        }),
+      ],
+      providers: [FirstUpdateHandler, SecondUpdateHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    bot.botInfo = getTestBotInfo();
+    await bot.handleUpdate(createTextMessageUpdate(1, 'Hello'));
+
+    expect(calls).toEqual(['first', 'second']);
+
+    await moduleRef.close();
+  });
+
+  it('registers fallback listeners after normal listeners and reports diagnostics', async () => {
+    const calls: string[] = [];
+    const registered: Array<{
+      providerName: string;
+      phase: string;
+      priority: number;
+      discoveryIndex: number;
+      registrationIndex: number;
+    }> = [];
+
+    @Update()
+    class FallbackUpdateHandler {
+      @ListenerPhase('fallback')
+      @On('text')
+      onFallback(): void {
+        calls.push('fallback');
+      }
+    }
+
+    @Update()
+    class NormalUpdateHandler {
+      @ListenerPriority(10)
+      @On('text')
+      async onLater(@Next() next: () => Promise<void>): Promise<void> {
+        calls.push('later');
+        await next();
+      }
+
+      @ListenerPriority(-10)
+      @On('text')
+      async onEarlier(@Next() next: () => Promise<void>): Promise<void> {
+        calls.push('earlier');
+        await next();
+      }
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        TelegrafModule.forRoot({
+          token: '1:test-token',
+          launchOptions: false,
+          listenerDiagnostics: {
+            onRegistered(listener): void {
+              registered.push({
+                providerName: listener.providerName,
+                phase: listener.phase,
+                priority: listener.priority,
+                discoveryIndex: listener.discoveryIndex,
+                registrationIndex: listener.registrationIndex,
+              });
+            },
+          },
+        }),
+      ],
+      providers: [FallbackUpdateHandler, NormalUpdateHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    bot.botInfo = getTestBotInfo();
+    await bot.handleUpdate(createTextMessageUpdate(1, 'Hello'));
+
+    expect(calls).toEqual(['earlier', 'later', 'fallback']);
+    expect(registered).toEqual([
+      {
+        providerName: 'NormalUpdateHandler',
+        phase: 'normal',
+        priority: -10,
+        discoveryIndex: 2,
+        registrationIndex: 0,
+      },
+      {
+        providerName: 'NormalUpdateHandler',
+        phase: 'normal',
+        priority: 10,
+        discoveryIndex: 1,
+        registrationIndex: 1,
+      },
+      {
+        providerName: 'FallbackUpdateHandler',
+        phase: 'fallback',
+        priority: 0,
+        discoveryIndex: 0,
+        registrationIndex: 2,
+      },
+    ]);
+
+    await moduleRef.close();
+  });
+
   it('applies module, class and method reply options to listener results', async () => {
     @ReplyOptions({ parse_mode: 'HTML', disable_notification: true })
     @Update()
@@ -309,12 +443,15 @@ describe('ListenersExplorerService', () => {
 
     @Wizard('wizard-scene')
     class WizardSceneHandler {
+      @ListenerPriority(-100)
       @WizardStep(1)
       @On('message')
       secondStep(): void {
         calls.push('second');
       }
 
+      @ListenerPhase('fallback')
+      @ListenerPriority(100)
       @WizardStep(0)
       @On('message')
       firstStep(): void {
@@ -377,6 +514,52 @@ describe('ListenersExplorerService', () => {
     );
 
     expect(calls).toEqual(['first', 'second']);
+
+    await moduleRef.close();
+  });
+
+  it('orders update listeners from imported modules by phase', async () => {
+    const calls: string[] = [];
+
+    @Update()
+    class ImportedUpdateHandler {
+      @On('text')
+      async onMessage(@Next() next: () => Promise<void>): Promise<void> {
+        calls.push('imported');
+        await next();
+      }
+    }
+
+    @Module({ providers: [ImportedUpdateHandler] })
+    class ImportedTelegramModule {}
+
+    @Update()
+    class FallbackUpdateHandler {
+      @ListenerPhase('fallback')
+      @On('text')
+      onFallback(): void {
+        calls.push('fallback');
+      }
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        ImportedTelegramModule,
+        TelegrafModule.forRoot({
+          token: '1:test-token',
+          launchOptions: false,
+        }),
+      ],
+      providers: [FallbackUpdateHandler],
+    }).compile();
+    await moduleRef.init();
+
+    const bot = moduleRef.get<Telegraf>(getBotToken());
+    jest.spyOn(bot, 'stop').mockImplementation(() => undefined);
+    bot.botInfo = getTestBotInfo();
+    await bot.handleUpdate(createTextMessageUpdate(1, 'Hello'));
+
+    expect(calls).toEqual(['imported', 'fallback']);
 
     await moduleRef.close();
   });

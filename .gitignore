@@ -17,6 +17,7 @@ npm-debug.log
 # tests
 /coverage
 /.nyc_output
+.temp/
 
 # source
 dist

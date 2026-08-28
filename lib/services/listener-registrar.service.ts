@@ -16,11 +16,21 @@ import {
   Update,
 } from '../decorators/core';
 import {
+  ListenerPhaseMetadataDecorator,
+  ListenerPriorityMetadataDecorator,
+} from '../decorators/core/listener-order.metadata';
+import {
   SceneEnter,
   SceneLeave,
   WizardStepMetadataDecorator,
 } from '../decorators/scene';
-import type { ListenerMetadata, SceneMetadata } from '../interfaces';
+import type {
+  ListenerMetadata,
+  ListenerRegistrationDescriptor,
+  ListenerRegistrationPhase,
+  SceneMetadata,
+  TelegrafListenerDiagnostics,
+} from '../interfaces';
 import type { ComposerMethodArgs } from '../types';
 import { ListenerDecorator } from '../utils';
 
@@ -29,6 +39,33 @@ type TelegrafPrototype = Record<string, TelegrafMethod>;
 type TelegrafSceneContext = Scenes.WizardContext;
 type TelegrafListenerCallback = MiddlewareFn<TelegrafSceneContext>;
 type WizardStep = { step: number; methodName: string };
+
+/** Provider `@Update()` listener-ов вместе с местом его NestJS discovery. */
+export interface UpdateListenerProvider {
+  readonly wrapper: InstanceWrapper<object>;
+  readonly moduleName: string;
+}
+
+type PendingUpdateListener = Omit<
+  ListenerRegistrationDescriptor,
+  'registrationIndex'
+> & {
+  readonly listener: TelegrafListenerCallback;
+};
+
+const listenerPhaseOrder: Record<ListenerRegistrationPhase, number> = {
+  normal: 0,
+  fallback: 1,
+};
+
+/** Сохраняет discovery-порядок, когда phase и priority совпадают. */
+const compareUpdateListeners = (
+  left: PendingUpdateListener,
+  right: PendingUpdateListener,
+): number =>
+  listenerPhaseOrder[left.phase] - listenerPhaseOrder[right.phase] ||
+  left.priority - right.priority ||
+  left.discoveryIndex - right.discoveryIndex;
 
 /** Создаёт NestJS-aware middleware для декорированного метода provider-а. */
 export type TelegrafListenerFactory = (
@@ -44,6 +81,7 @@ export class ListenerRegistrarService {
     private readonly metadataScanner: MetadataScanner,
     private readonly createListener: TelegrafListenerFactory,
     private readonly botName: string,
+    private readonly listenerDiagnostics?: TelegrafListenerDiagnostics,
   ) {}
 
   public registerBeforeStage(
@@ -61,11 +99,21 @@ export class ListenerRegistrarService {
   }
 
   public registerUpdates(
-    wrappers: InstanceWrapper<object>[],
+    providers: UpdateListenerProvider[],
     bot: Telegraf<TelegrafSceneContext>,
   ): void {
-    for (const wrapper of this.getDecoratedProviders(wrappers, Update)) {
-      this.registerListeners(bot, wrapper);
+    const listeners = this.collectUpdateListeners(providers);
+    const orderedListeners = listeners.sort(compareUpdateListeners);
+
+    for (const [registrationIndex, listener] of orderedListeners.entries()) {
+      this.registerComposerMethod(
+        bot,
+        listener.listenerMethod,
+        listener.args,
+        listener.listener,
+      );
+      const { listener: _listener, ...descriptor } = listener;
+      this.onUpdateListenerRegistered({ ...descriptor, registrationIndex });
     }
   }
 
@@ -89,6 +137,67 @@ export class ListenerRegistrarService {
       this.registerListeners(composer, wrapper);
       stage.use(composer);
     }
+  }
+
+  /** Собирает update-listener-ы без регистрации, чтобы упорядочить их глобально. */
+  private collectUpdateListeners(
+    providers: UpdateListenerProvider[],
+  ): PendingUpdateListener[] {
+    const listeners: PendingUpdateListener[] = [];
+    let discoveryIndex = 0;
+
+    for (const { wrapper, moduleName } of providers) {
+      if (
+        !wrapper.metatype ||
+        this.reflector.get(Update, wrapper.metatype) === undefined
+      ) {
+        continue;
+      }
+
+      const { instance } = wrapper;
+      const prototype = this.getPrototype(instance);
+      if (!prototype) {
+        continue;
+      }
+
+      for (const methodName of this.metadataScanner.getAllMethodNames(
+        prototype,
+      )) {
+        const methodRef = prototype[methodName];
+        const metadata = this.reflector.get(ListenerDecorator, methodRef);
+        if (!metadata?.length) {
+          continue;
+        }
+
+        const listener = this.createListener(instance, prototype, methodName);
+        if (!listener) {
+          continue;
+        }
+
+        const phase =
+          this.reflector.get(ListenerPhaseMetadataDecorator, methodRef) ??
+          'normal';
+        const priority =
+          this.reflector.get(ListenerPriorityMetadataDecorator, methodRef) ?? 0;
+
+        for (const { method, args } of metadata) {
+          listeners.push({
+            moduleName,
+            providerName: this.getClassName(wrapper),
+            methodName,
+            listenerMethod: method,
+            args,
+            phase,
+            priority,
+            discoveryIndex,
+            listener,
+          });
+          discoveryIndex += 1;
+        }
+      }
+    }
+
+    return listeners;
   }
 
   /** Регистрирует сцены и проверяет уникальность их ID в пределах stage бота. */
@@ -296,6 +405,14 @@ export class ListenerRegistrarService {
       ...arguments_: [...unknown[], TelegrafListenerCallback]
     ) => Composer<TelegrafSceneContext>;
     register.call(composer, ...args, listener);
+  }
+
+  private onUpdateListenerRegistered(
+    listener: ListenerRegistrationDescriptor,
+  ): void {
+    // Diagnostics подключаются снаружи только для update-listener-ов.
+    // Composer и сцены имеют отдельный lifecycle и порядок регистрации.
+    this.listenerDiagnostics?.onRegistered(listener);
   }
 
   private getPrototype(instance: object): TelegrafPrototype | undefined {
