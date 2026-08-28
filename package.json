@@ -67,7 +67,7 @@
     "release:minor": "release-it minor",
     "release:major": "release-it major",
     "release:patch": "release-it patch",
-    "release:rc": "release-it --preRelease=rc",
+    "release:rc": "release-it prerelease --preRelease=rc",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
