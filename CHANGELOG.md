@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.0.0-rc.2](https://github.com/xTCry/nestjs-telega/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2026-08-28)
+
+### 🧹 Chore
+
+* **release:** add explicit latest prerelease publishing ([cfd44a5](https://github.com/xTCry/nestjs-telega/commit/cfd44a520aee6315259f0fa8a5484826ae365ac6))
+
+### 🚀 Features
+
+* **listeners:** add ordered update listener registration ([789d68d](https://github.com/xTCry/nestjs-telega/commit/789d68d00a12925db099e3967e0f941053a82e54))
+
+### 🐛 Bug Fixes
+
+* **release:** increment consecutive release candidates ([c94e79a](https://github.com/xTCry/nestjs-telega/commit/c94e79ae4d9ec5d627258d14862515cbf1b0bc83))
+
+### 🛠️ CI
+
+* **docs:** fetch full history for page update dates ([6769432](https://github.com/xTCry/nestjs-telega/commit/6769432ec3c18ea35cd6b8e2419dbb28f4703fff))
+
+### 🌟 Samples
+
+* **listeners:** demonstrate ordered listener registration ([03ccaca](https://github.com/xTCry/nestjs-telega/commit/03ccacaecc7824a4fab6fc1c619fa635564dd032))
+
 ## [1.0.0-rc.1](https://github.com/xTCry/nestjs-telega/compare/v0.1.0...v1.0.0-rc.1) (2026-08-26)
 
 ### ⚠ BREAKING CHANGES
