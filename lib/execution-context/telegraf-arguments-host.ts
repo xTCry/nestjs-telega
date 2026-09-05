@@ -1,6 +1,6 @@
 import { ArgumentsHost } from '@nestjs/common';
 import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
-import type { Context, MiddlewareFn } from 'telegraf-hardened';
+import type { Context } from 'telegraf-hardened';
 
 import { TelegrafContextType } from './telegraf-execution-context';
 
@@ -20,7 +20,8 @@ export class TelegrafArgumentsHost extends ExecutionContextHost {
     return this.getArgByIndex(0);
   }
 
-  public getNext<T = MiddlewareFn<Context>>(): T {
+  /** Возвращает callback для передачи update следующему middleware. */
+  public getNext(): () => Promise<void> {
     return this.getArgByIndex(1);
   }
 }

@@ -4,7 +4,7 @@ import { createTelegrafParamDecorator } from '../../utils/param-decorator.util';
 /**
  * Извлекает следующий middleware callback.
  *
- * Тип параметра: {@link import('telegraf-hardened').MiddlewareFn}.
+ * Тип параметра: `() => Promise<void>`.
  */
 export const TgNext: () => ParameterDecorator = createTelegrafParamDecorator(
   TelegrafParamtype.NEXT,

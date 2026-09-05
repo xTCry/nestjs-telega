@@ -4,7 +4,8 @@ import { ListenerDecorator } from '../../utils';
  * Registers a middleware.
  *
  * Типы параметров: {@link import('telegraf-hardened').Context} и
- * {@link import('telegraf-hardened').MiddlewareFn} для `@Ctx()` и `@Next()`.
+ * {@link import('telegraf-hardened').MiddlewareFn} для `@Ctx()` и
+ * `() => Promise<void>` для `@Next()`.
  *
  * @see https://telegraf.js.org/#/?id=use
  */

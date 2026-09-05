@@ -1,5 +1,5 @@
 import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
-import type { Context, MiddlewareFn } from 'telegraf-hardened';
+import type { Context } from 'telegraf-hardened';
 
 import { TelegrafParamtype } from '../lib/enums/telegraf-paramtype.enum';
 import {
@@ -22,7 +22,7 @@ describe('Telegraf execution context', () => {
     messageReaction: { message_id: 6, new_reaction: ['👍'] },
     messageReactionCount: { message_id: 7, reactions: [] },
   } as unknown as Context;
-  const next: MiddlewareFn<Context> = () => Promise.resolve();
+  const next = (): Promise<void> => Promise.resolve();
 
   it('preserves context, next middleware and custom context type', () => {
     const host = new ExecutionContextHost([context, next]);
