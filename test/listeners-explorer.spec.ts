@@ -641,11 +641,17 @@ describe('ListenersExplorerService', () => {
 
   it('applies Nest guards, pipes, and interceptors to update listeners', async () => {
     const calls: string[] = [];
+    let guardClass: Function | undefined;
+    let guardHandler: Function | undefined;
+    let interceptorClass: Function | undefined;
+    let interceptorHandler: Function | undefined;
 
     @Injectable()
     class AllowGuard implements CanActivate {
       canActivate(context: ExecutionContext): boolean {
         calls.push(`guard:${context.getType<string>()}`);
+        guardClass = context.getClass();
+        guardHandler = context.getHandler();
         return true;
       }
     }
@@ -665,6 +671,8 @@ describe('ListenersExplorerService', () => {
         next: CallHandler,
       ): ReturnType<CallHandler['handle']> {
         calls.push(`interceptor:${context.getType<string>()}`);
+        interceptorClass = context.getClass();
+        interceptorHandler = context.getHandler();
         return next.handle();
       }
     }
@@ -706,6 +714,10 @@ describe('ListenersExplorerService', () => {
       'pipe',
       'listener:HELLO',
     ]);
+    expect(guardClass).toBe(UpdateHandler);
+    expect(guardHandler).toBe(UpdateHandler.prototype.onMessage);
+    expect(interceptorClass).toBe(UpdateHandler);
+    expect(interceptorHandler).toBe(UpdateHandler.prototype.onMessage);
 
     await moduleRef.close();
   });
@@ -941,12 +953,15 @@ describe('ListenersExplorerService', () => {
 
   it('applies Nest exception filters to update listeners', async () => {
     const caughtErrors: string[] = [];
+    let handledClass: Function | undefined;
+    let handledMethod: Function | undefined;
 
     @Catch(Error)
-    @Injectable()
     class UpdateExceptionFilter implements ExceptionFilter {
       catch(exception: Error, context: ExecutionContext): boolean {
         caughtErrors.push(`${context.getType<string>()}:${exception.message}`);
+        handledClass = context.getClass();
+        handledMethod = context.getHandler();
         return true;
       }
     }
@@ -969,7 +984,7 @@ describe('ListenersExplorerService', () => {
           useCatchLogger: filterLogger,
         }),
       ],
-      providers: [UpdateExceptionFilter, UpdateHandler],
+      providers: [UpdateHandler],
     }).compile();
     await moduleRef.init();
 
@@ -982,6 +997,8 @@ describe('ListenersExplorerService', () => {
     ).resolves.toBeUndefined();
 
     expect(caughtErrors).toEqual(['telegraf:listener failed']);
+    expect(handledClass).toBe(UpdateHandler);
+    expect(handledMethod).toBe(UpdateHandler.prototype.onMessage);
     expect(filterLogger).not.toHaveBeenCalled();
 
     await moduleRef.close();

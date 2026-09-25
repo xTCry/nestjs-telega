@@ -17,6 +17,7 @@ import type {
 } from '../interfaces';
 import { PARAM_ARGS_METADATA } from '../telegraf.constants';
 import { applyListenerResult } from '../utils';
+import { createTelegrafExceptionProxy } from '../utils/create-telegraf-exception-proxy.util';
 import {
   ListenerRegistrarService,
   TelegrafListenerFactory,
@@ -151,7 +152,7 @@ export class ListenersExplorerService implements OnModuleInit {
       return undefined;
     }
 
-    return this.externalContextCreator.create<
+    const callback = this.externalContextCreator.create<
       Record<number, ParamMetadata>,
       TelegrafContextType
     >(
@@ -162,8 +163,15 @@ export class ListenersExplorerService implements OnModuleInit {
       this.telegrafParamsFactory,
       undefined,
       undefined,
-      { guards: true, filters: true, interceptors: true },
+      { guards: true, filters: false, interceptors: true },
       'telegraf',
+    ) as TelegrafListenerCallback;
+
+    return createTelegrafExceptionProxy(
+      this.externalContextCreator,
+      instance,
+      methodRef,
+      callback,
     ) as TelegrafListenerCallback;
   }
 }

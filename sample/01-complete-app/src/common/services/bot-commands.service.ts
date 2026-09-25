@@ -11,6 +11,10 @@ const defaultBotCommands = [
   { command: 'format', description: 'Send a formatted message' },
   { command: 'keyboard', description: 'Show an inline keyboard' },
   { command: 'menu', description: 'Show a reply keyboard' },
+  {
+    command: 'exception',
+    description: 'Verify exception filter handler metadata',
+  },
   { command: 'stars', description: 'Read the bot Stars balance' },
   { command: 'gifts', description: 'Read your Telegram gifts' },
   { command: 'paidmedia', description: 'Send configured paid media' },

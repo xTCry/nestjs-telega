@@ -1,4 +1,4 @@
-import { ArgumentsHost } from '@nestjs/common';
+import { ArgumentsHost, ExecutionContext } from '@nestjs/common';
 import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
 import type { Context } from 'telegraf-hardened';
 
@@ -7,7 +7,14 @@ import { TelegrafContextType } from './telegraf-execution-context';
 export class TelegrafArgumentsHost extends ExecutionContextHost {
   public static create(context: ArgumentsHost): TelegrafArgumentsHost {
     const type = context.getType();
-    const tgContext = new TelegrafArgumentsHost(context.getArgs());
+    const executionContext = context as Partial<ExecutionContext>;
+    const constructorRef = executionContext.getClass?.();
+    const handler = executionContext.getHandler?.();
+    const tgContext = new TelegrafArgumentsHost(
+      context.getArgs(),
+      constructorRef,
+      handler,
+    );
     tgContext.setType(type);
     return tgContext;
   }

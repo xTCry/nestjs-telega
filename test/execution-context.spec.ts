@@ -24,8 +24,18 @@ describe('Telegraf execution context', () => {
   } as unknown as Context;
   const next = (): Promise<void> => Promise.resolve();
 
-  it('preserves context, next middleware and custom context type', () => {
-    const host = new ExecutionContextHost([context, next]);
+  it('preserves context, next middleware, handler metadata and custom context type', () => {
+    class UpdateHandler {
+      onMessage(): void {
+        return undefined;
+      }
+    }
+
+    const host = new ExecutionContextHost(
+      [context, next],
+      UpdateHandler,
+      UpdateHandler.prototype.onMessage,
+    );
     host.setType('telegraf');
 
     const argumentsHost = TelegrafArgumentsHost.create(host);
@@ -34,9 +44,15 @@ describe('Telegraf execution context', () => {
     expect(argumentsHost.getType()).toBe('telegraf');
     expect(argumentsHost.getContext()).toBe(context);
     expect(argumentsHost.getNext()).toBe(next);
+    expect(argumentsHost.getClass()).toBe(UpdateHandler);
+    expect(argumentsHost.getHandler()).toBe(UpdateHandler.prototype.onMessage);
     expect(executionContext.getType()).toBe('telegraf');
     expect(executionContext.getContext()).toBe(context);
     expect(executionContext.getNext()).toBe(next);
+    expect(executionContext.getClass()).toBe(UpdateHandler);
+    expect(executionContext.getHandler()).toBe(
+      UpdateHandler.prototype.onMessage,
+    );
   });
 
   it('extracts typed parameter values without throwing for missing context', () => {
