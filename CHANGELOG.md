@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.0-rc.3](https://github.com/xTCry/nestjs-telega/compare/v1.0.0-rc.2...v1.0.0-rc.3) (2026-09-25)
+
+### 🧹 Chore
+
+* **context:** preserve handler metadata in exception filters ([c578216](https://github.com/xTCry/nestjs-telega/commit/c578216f4fd0c4abc2c6fb2beb4458dcf765aabd))
+
+### 🐛 Bug Fixes
+
+* **context:** type telegraf next callback correctly ([e6e7fcb](https://github.com/xTCry/nestjs-telega/commit/e6e7fcbb1d209f726efd9a210977dc20288e7ac3))
+
 ## [1.0.0-rc.2](https://github.com/xTCry/nestjs-telega/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2026-08-28)
 
 ### 🧹 Chore
