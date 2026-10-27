@@ -101,7 +101,7 @@ describe('Greeter sample with local Telegram API', () => {
       message_id: 0,
       ephemeral_message_id: 77,
       date: 0,
-      chat: { id: params.chat_id, type: 'private', first_name: 'Test' },
+      chat: { id: params.chat_id, type: 'supergroup', title: 'Test group' },
       from: api.botInfo,
       receiver_user: { id: 42, is_bot: false, first_name: 'Test' },
       reply_markup: params.reply_markup,
@@ -126,10 +126,14 @@ describe('Greeter sample with local Telegram API', () => {
       const polling = bot.launch();
       try {
         await api.waitForPolling();
-        api.pushText({ id: 42 }, '/ephemeral');
+        api.pushChatText(
+          { id: 42 },
+          { id: -100, type: 'supergroup', title: 'Test group' },
+          '/ephemeral',
+        );
         const sent = await api.waitForCall('sendMessage');
         expect(sent.params).toMatchObject({
-          chat_id: 42,
+          chat_id: -100,
           ephemeral_message_parameters: { receiver_user_id: 42 },
         });
         const message = sent.result as FakeTelegramMessage;
@@ -137,7 +141,7 @@ describe('Greeter sample with local Telegram API', () => {
         expect(
           (await api.waitForCall('editEphemeralMessageText')).params,
         ).toMatchObject({
-          chat_id: 42,
+          chat_id: -100,
           receiver_user_id: 42,
           ephemeral_message_id: 77,
         });
@@ -145,7 +149,7 @@ describe('Greeter sample with local Telegram API', () => {
         expect(
           (await api.waitForCall('deleteEphemeralMessage')).params,
         ).toMatchObject({
-          chat_id: 42,
+          chat_id: -100,
           receiver_user_id: 42,
           ephemeral_message_id: 77,
         });

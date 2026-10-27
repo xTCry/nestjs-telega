@@ -57,16 +57,31 @@ untrusted values before inserting them into HTML.
 
 ## Ephemeral messages
 
-An ephemeral message is visible only to its specified recipient. This sends one
-to the user who invoked the command:
+An ephemeral message is visible only to its specified recipient. This sample
+uses a group where the bot is an administrator; it explains the restriction in
+a private chat or when Telegram reports `BOT_NOT_ADMIN`:
 
 ```ts
+import { TelegramError } from 'telegraf-hardened';
+
 @Command('ephemeral')
 async sendEphemeral(@Ctx() ctx: Context): Promise<void> {
   if (!ctx.from) return;
-  await ctx.reply('Only you can see this message.', {
-    ephemeral_message_parameters: { receiver_user_id: ctx.from.id },
-  });
+  if (ctx.chat?.type === 'private') {
+    await ctx.reply('Try this in a group where the bot is an administrator.');
+    return;
+  }
+  try {
+    await ctx.reply('Only you can see this message.', {
+      ephemeral_message_parameters: { receiver_user_id: ctx.from.id },
+    });
+  } catch (error) {
+    if (error instanceof TelegramError && error.description.includes('BOT_NOT_ADMIN')) {
+      await ctx.reply('Make the bot an administrator in this group and try again.');
+      return;
+    }
+    throw error;
+  }
 }
 ```
 

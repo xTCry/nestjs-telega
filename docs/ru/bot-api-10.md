@@ -58,16 +58,31 @@ export class RichUpdate {
 
 ## Ephemeral messages
 
-Временное сообщение видно только указанному получателю. Пример отправляет его
-пользователю, вызвавшему команду:
+Временное сообщение видно только указанному получателю. В примере команда
+используется в группе, где бот является администратором; для личного чата и
+ошибки Telegram `BOT_NOT_ADMIN` выводится подсказка:
 
 ```ts
+import { TelegramError } from 'telegraf-hardened';
+
 @Command('ephemeral')
 async sendEphemeral(@Ctx() ctx: Context): Promise<void> {
   if (!ctx.from) return;
-  await ctx.reply('Это сообщение видно только вам.', {
-    ephemeral_message_parameters: { receiver_user_id: ctx.from.id },
-  });
+  if (ctx.chat?.type === 'private') {
+    await ctx.reply('Попробуйте в группе, где бот является администратором.');
+    return;
+  }
+  try {
+    await ctx.reply('Это сообщение видно только вам.', {
+      ephemeral_message_parameters: { receiver_user_id: ctx.from.id },
+    });
+  } catch (error) {
+    if (error instanceof TelegramError && error.description.includes('BOT_NOT_ADMIN')) {
+      await ctx.reply('Назначьте бота администратором группы и повторите.');
+      return;
+    }
+    throw error;
+  }
 }
 ```
 

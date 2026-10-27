@@ -1,5 +1,5 @@
 import { Action, Command, Ctx, Update } from 'nestjs-telega';
-import { Markup } from 'telegraf-hardened';
+import { Markup, TelegramError } from 'telegraf-hardened';
 
 import { Context } from '../interfaces/context.interface';
 
@@ -20,16 +20,36 @@ export class EphemeralUpdate {
   async onEphemeral(@Ctx() ctx: Context): Promise<void> {
     if (!ctx.from) return;
 
-    await ctx.reply(
-      'Only you can see this temporary message. Use the buttons to edit or delete it.',
-      {
-        ephemeral_message_parameters: { receiver_user_id: ctx.from.id },
-        ...Markup.inlineKeyboard([
-          Markup.button.callback('Update', 'ephemeral:update'),
-          Markup.button.callback('Delete', 'ephemeral:delete'),
-        ]),
-      },
-    );
+    if (ctx.chat?.type === 'private') {
+      await ctx.reply(
+        'Try /ephemeral in a group where this bot is an administrator. Temporary messages are not available in private chats.',
+      );
+      return;
+    }
+
+    try {
+      await ctx.reply(
+        'Only you can see this temporary message. Use the buttons to edit or delete it.',
+        {
+          ephemeral_message_parameters: { receiver_user_id: ctx.from.id },
+          ...Markup.inlineKeyboard([
+            Markup.button.callback('Update', 'ephemeral:update'),
+            Markup.button.callback('Delete', 'ephemeral:delete'),
+          ]),
+        },
+      );
+    } catch (error) {
+      if (
+        error instanceof TelegramError &&
+        error.description.includes('BOT_NOT_ADMIN')
+      ) {
+        await ctx.reply(
+          'To try /ephemeral, make this bot an administrator in this group and try again.',
+        );
+        return;
+      }
+      throw error;
+    }
   }
 
   @Action('ephemeral:update')
