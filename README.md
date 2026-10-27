@@ -14,7 +14,7 @@ with [NestJS](https://github.com/nestjs/nest). It provides a NestJS module,
 decorators for Telegram updates, scenes and wizards, plus integration with
 guards, interceptors, filters and pipes.
 
-> This `main` branch prepares the next default release line. The stable
+> The default npm line uses `telegraf-hardened`. The
 > [Telegraf](https://github.com/telegraf/telegraf) implementation is maintained in the
 > [telegraf branch](https://github.com/xTCry/nestjs-telega/tree/telegraf) and
 > published under the npm dist-tag `telegraf`.
@@ -43,11 +43,11 @@ Always include `@telegraf` for the current
 [Telegraf](https://github.com/telegraf/telegraf)-based release line.
 `telegraf` is a peer dependency and must be installed by the application.
 
-## Install the next default line
+## Install the telegraf-hardened line
 
-The code in `main` uses
+The default package uses
 [telegraf-hardened](https://github.com/telegraf-hardened/telegraf-hardened)
-and requires Node.js 18 or newer:
+and requires Node.js 18 or newer and NestJS 10 or 11:
 
 ```bash
 npm install nestjs-telega telegraf-hardened
@@ -59,7 +59,7 @@ yarn add nestjs-telega telegraf-hardened
 
 ## Quick start
 
-The example below applies to the next telegraf-hardened release line.
+The example below uses the telegraf-hardened release line.
 
 Register the module in the root NestJS module. By default, the bot starts with
 long polling when the application is initialized.
@@ -191,8 +191,17 @@ Call `forRoot()` or `forRootAsync()` once for each bot and give every
 additional bot a unique `botName`. Inject a specific instance with
 `@TgInjectBot(botName)` or access the registry with `@TgInjectAllBots()`.
 
-The [complete sample](sample/01-complete-app) demonstrates a default bot, two
-named bots, scenes, a wizard, middleware and bot injection.
+The [complete sample](sample/01-complete-app) demonstrates a default bot and
+an optional named Business bot, scenes, a wizard, middleware and bot injection.
+
+## Bot API 10.3
+
+With `telegraf-hardened` 6.1 or newer, handlers can use rich messages,
+ephemeral messages and other Bot API 10.3 features directly through `ctx`.
+The package's peer range also allows 6.0, so install 6.1 or newer when using
+those features. See the [Bot API guide](docs/bot-api-10.md) for examples and
+type changes. Rich and ephemeral sample flows have not yet been verified with
+a live Telegram client.
 
 ## Documentation and support
 

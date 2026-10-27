@@ -10,7 +10,7 @@ provider сцены через `@Scene()` или `@Wizard()` — модуль с
 ## Обычная сцена
 
 ```ts title="src/profile.scene.ts"
-import { Ctx, On, Scene, SceneEnter, SceneLeave } from 'nestjs-telega';
+import { Command, Ctx, On, Scene, SceneEnter, SceneLeave } from 'nestjs-telega';
 import type { Scenes } from 'telegraf-hardened';
 
 const PROFILE_SCENE_ID = 'profile';
@@ -20,6 +20,11 @@ export class ProfileScene {
   @SceneEnter()
   onEnter(): string {
     return 'Отправьте отображаемое имя или используйте /leave для отмены.';
+  }
+
+  @Command('leave')
+  async cancel(@Ctx() ctx: Scenes.SceneContext): Promise<void> {
+    await ctx.scene.leave();
   }
 
   @On('text')

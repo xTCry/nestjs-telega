@@ -12,7 +12,7 @@ reply, результаты callback/inline query и несколько изол
 ## Установка
 
 Основная линия пакета использует `telegraf-hardened` и требует Node.js 18 или
-новее:
+новее и NestJS 10 или 11:
 
 ```bash
 npm install nestjs-telega telegraf-hardened
@@ -21,6 +21,10 @@ npm install nestjs-telega telegraf-hardened
 ```bash
 yarn add nestjs-telega telegraf-hardened
 ```
+
+Для rich messages и других возможностей Bot API 10.3 используйте
+[telegraf-hardened 6.1 или новее](/ru/bot-api-10). В библиотеке также есть
+[локальный testing API](/ru/testing).
 
 Прежняя линия на [Telegraf](https://github.com/telegraf/telegraf) находится в
 [ветке telegraf](https://github.com/xTCry/nestjs-telega/tree/telegraf) и

@@ -42,12 +42,12 @@ Nest parameter decorators не меняют вывод типов TypeScript. У
 параметра явно, используя публичные типы `telegraf-hardened`; JSDoc каждого
 декоратора также содержит ссылку на подходящий тип.
 
-| Декоратор | Рекомендуемый тип параметра |
-| --- | --- |
-| `@Ctx()` | `Context` или собственный расширенный context interface |
-| `@Message()` | `Message` из `telegraf-hardened/types` |
-| `@Sender()` | `User` из `telegraf-hardened/types` |
-| `@Next()` | next callback `MiddlewareFn<Context>` из `telegraf-hardened` |
+| Декоратор    | Рекомендуемый тип параметра                             |
+| ------------ | ------------------------------------------------------- |
+| `@Ctx()`     | `Context` или собственный расширенный context interface |
+| `@Message()` | `Message` из `telegraf-hardened/types`                  |
+| `@Sender()`  | `User` из `telegraf-hardened/types`                     |
+| `@Next()`    | callback `() => Promise<void>`                          |
 
 ## Результаты reply
 

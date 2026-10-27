@@ -10,7 +10,7 @@ The context type must include Telegraf's scene context. For a base scene use
 ## Base scene
 
 ```ts title="src/profile.scene.ts"
-import { Ctx, On, Scene, SceneEnter, SceneLeave } from 'nestjs-telega';
+import { Command, Ctx, On, Scene, SceneEnter, SceneLeave } from 'nestjs-telega';
 import type { Scenes } from 'telegraf-hardened';
 
 const PROFILE_SCENE_ID = 'profile';
@@ -20,6 +20,11 @@ export class ProfileScene {
   @SceneEnter()
   onEnter(): string {
     return 'Send a display name, or use /leave to cancel.';
+  }
+
+  @Command('leave')
+  async cancel(@Ctx() ctx: Scenes.SceneContext): Promise<void> {
+    await ctx.scene.leave();
   }
 
   @On('text')

@@ -12,7 +12,7 @@ options, callback/inline-query results, and multiple isolated bot instances.
 ## Installation
 
 The default package line uses `telegraf-hardened` and requires Node.js 18 or
-newer:
+newer, with NestJS 10 or 11:
 
 ```bash
 npm install nestjs-telega telegraf-hardened
@@ -21,6 +21,10 @@ npm install nestjs-telega telegraf-hardened
 ```bash
 yarn add nestjs-telega telegraf-hardened
 ```
+
+For rich messages and other Bot API 10.3 features, use
+[telegraf-hardened 6.1 or newer](/bot-api-10). The library also includes a
+[local testing API](/testing).
 
 The legacy [Telegraf](https://github.com/telegraf/telegraf)-based line lives in
 the [telegraf branch](https://github.com/xTCry/nestjs-telega/tree/telegraf)

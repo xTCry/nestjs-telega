@@ -7,14 +7,7 @@ others. Both unprefixed names and `Tg*` aliases are available. Prefer `Tg*`
 when an application combines decorators from several bot transports.
 
 ```ts title="src/app.update.ts"
-import {
-  Ctx,
-  Help,
-  On,
-  Hears,
-  Start,
-  Update,
-} from 'nestjs-telega';
+import { Ctx, Hears, Help, On, Start, Update } from 'nestjs-telega';
 import type { Context } from 'telegraf-hardened';
 
 @Update()
@@ -47,12 +40,12 @@ Nest parameter decorators do not change TypeScript's inferred type. Annotate
 the parameter explicitly with a public type from `telegraf-hardened`; each
 decorator's JSDoc also links to the appropriate type.
 
-| Decorator | Suggested parameter type |
-| --- | --- |
-| `@Ctx()` | `Context` or your extended context interface |
-| `@Message()` | `Message` from `telegraf-hardened/types` |
-| `@Sender()` | `User` from `telegraf-hardened/types` |
-| `@Next()` | `MiddlewareFn<Context>` next callback from `telegraf-hardened` |
+| Decorator    | Suggested parameter type                     |
+| ------------ | -------------------------------------------- |
+| `@Ctx()`     | `Context` or your extended context interface |
+| `@Message()` | `Message` from `telegraf-hardened/types`     |
+| `@Sender()`  | `User` from `telegraf-hardened/types`        |
+| `@Next()`    | `() => Promise<void>`                        |
 
 ## Reply results
 
@@ -61,7 +54,12 @@ as replies. Use the object form to provide Telegraf reply options; class-level
 and method-level `@ReplyOptions()` values are merged with the result.
 
 ```ts
-import { Command, ReplyOptions, TelegrafListenerResult, Update } from 'nestjs-telega';
+import {
+  Command,
+  ReplyOptions,
+  TelegrafListenerResult,
+  Update,
+} from 'nestjs-telega';
 
 @Update()
 @ReplyOptions({ parse_mode: 'HTML' })
