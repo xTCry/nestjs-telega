@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.0.0-rc.4](https://github.com/xTCry/nestjs-telega/compare/v1.0.0-rc.3...v1.0.0-rc.4) (2026-10-27)
+
+### 🧹 Chore
+
+* **deps:** update telegraf-hardened to v6.1 ([a9a543c](https://github.com/xTCry/nestjs-telega/commit/a9a543c3c203c4c9f51bec1650345b6f7f9a5960))
+
+### 🚀 Features
+
+* **testing:** add reusable fake telegram api ([cb7e1f7](https://github.com/xTCry/nestjs-telega/commit/cb7e1f79bb85f9e45c83d62e167615d5daf0aa03))
+
+### 🐛 Bug Fixes
+
+* **core:** adapt listener results to telegraf-hardened v6.1 ([72f8593](https://github.com/xTCry/nestjs-telega/commit/72f85930b2ead083f1ac1f7aec3a6e01c693dee3))
+* **sample:** handle ephemeral message admin requirements ([b8c6958](https://github.com/xTCry/nestjs-telega/commit/b8c695871a18301a1846abfdcec2e367410b23cb))
+* **testing:** improve fake api compatibility and customization ([6fe1b66](https://github.com/xTCry/nestjs-telega/commit/6fe1b66f38db150285d6bbe25284d8114054bc6e))
+
+### 📖 Documentation
+
+* **agent:** add telegram and nestjs-telega skills ([b92a3a6](https://github.com/xTCry/nestjs-telega/commit/b92a3a606b3f0b95b95e9241dfdff3745fa56021))
+* update guides for bot api 10.3 and testing ([b3ba810](https://github.com/xTCry/nestjs-telega/commit/b3ba810424be1537700b5a0b2d280efb8a328c08))
+
+### 🌟 Samples
+
+* demonstrate ephemeral messages ([2112107](https://github.com/xTCry/nestjs-telega/commit/2112107aa3f184c44f9ee1cfbcf87252a68fbbe0))
+* demonstrate rich messages and polling tests ([d982dce](https://github.com/xTCry/nestjs-telega/commit/d982dcec1e014e141084233a59d11576324bd648))
+* improve scene and wizard navigation ([8c376f8](https://github.com/xTCry/nestjs-telega/commit/8c376f8df68ff3512a90c8feb4a6fa01def22644))
+
 ## [1.0.0-rc.3](https://github.com/xTCry/nestjs-telega/compare/v1.0.0-rc.2...v1.0.0-rc.3) (2026-09-25)
 
 ### 🧹 Chore
