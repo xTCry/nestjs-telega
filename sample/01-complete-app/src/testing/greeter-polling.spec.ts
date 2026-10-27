@@ -8,6 +8,93 @@ import { GreeterModule } from '../greeter/greeter.module';
 import { sessionMiddleware } from '../middleware/session.middleware';
 
 describe('Greeter sample with local Telegram API', () => {
+  it('cancels the wizard and navigates the random scene with buttons', async () => {
+    const api = await FakeTelegramApi.start();
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        GreeterModule,
+        TelegrafModule.forRoot({
+          token: '1:test-token',
+          launchOptions: false,
+          options: { telegram: { apiRoot: api.url } },
+          middlewaresBefore: [sessionMiddleware],
+          include: [GreeterModule],
+        }),
+      ],
+    }).compile();
+    try {
+      await moduleRef.init();
+      const bot = moduleRef.get<Telegraf>(getBotToken());
+      const polling = bot.launch();
+      try {
+        await api.waitForPolling();
+        const user = { id: 44 };
+        api.pushText(user, '/wizard');
+        await api.waitForCall('sendMessage', (call) =>
+          String(call.params.text).includes('Step 1 of 2'),
+        );
+        const wizardPrompt = api.getMessageWithCallback('wizard:cancel');
+        expect(wizardPrompt).toBeDefined();
+        api.pushCallback(user, 'wizard:cancel', wizardPrompt!);
+        await api.waitForCall('editMessageText', (call) =>
+          String(call.params.text).includes('wizard cancelled'),
+        );
+        const menu = api.getMessageWithCallback('greeter:scene');
+        expect(menu).toBeDefined();
+        api.pushCallback(user, 'greeter:scene', menu!);
+        await api.waitForCall('sendMessage', (call) =>
+          String(call.params.text).includes('Random number example'),
+        );
+        const scene = api.getMessageWithCallback('scene:random');
+        expect(scene).toBeDefined();
+        const after = api.calls.length;
+        api.pushCallback(user, 'scene:random', scene!);
+        const firstNumber = (
+          await api.waitForNextCall(after, 'editMessageText')
+        ).params.text;
+        expect(firstNumber).toMatch(/Your number: \d+/);
+        const updated = api.getMessageWithCallback('scene:leave');
+        const beforeSecond = api.calls.length;
+        api.pushCallback(user, 'scene:random', updated!);
+        expect(
+          (await api.waitForNextCall(beforeSecond, 'editMessageText')).params
+            .text,
+        ).not.toBe(firstNumber);
+        const beforeLeave = api.calls.length;
+        api.pushCallback(
+          user,
+          'scene:leave',
+          api.getMessageWithCallback('scene:leave')!,
+        );
+        expect(
+          (await api.waitForNextCall(beforeLeave, 'editMessageText')).params
+            .text,
+        ).toContain('example closed');
+        expect(api.getMessageWithCallback('greeter:wizard')).toBeDefined();
+        const beforeWizard = api.calls.length;
+        api.pushText(user, '/wizard');
+        await api.waitForNextCall(beforeWizard, 'sendMessage', (call) =>
+          String(call.params.text).includes('Step 1 of 2'),
+        );
+        api.pushText(user, 'Alice');
+        await api.waitForNextCall(beforeWizard, 'sendMessage', (call) =>
+          String(call.params.text).includes('Step 2 of 2'),
+        );
+        const beforeCancel = api.calls.length;
+        api.pushText(user, '/cancel');
+        expect(
+          (await api.waitForNextCall(beforeCancel, 'sendMessage')).params.text,
+        ).toContain('wizard cancelled');
+      } finally {
+        bot.stop();
+        await polling;
+      }
+    } finally {
+      await moduleRef.close();
+      await api.close();
+    }
+  }, 15000);
+
   it('sends and manages an ephemeral message for its recipient', async () => {
     const api = await FakeTelegramApi.start();
     api.onMethod('sendMessage', (params) => ({

@@ -1,4 +1,6 @@
 import {
+  Action,
+  Command,
   Ctx,
   Message,
   On,
@@ -9,6 +11,7 @@ import {
 import type { Scenes } from 'telegraf-hardened';
 
 import { WIZARD_SCENE_ID } from '../../app.constants';
+import { createGreeterMenu, createWizardKeyboard } from '../greeter-keyboard';
 
 @Wizard(WIZARD_SCENE_ID)
 export class GreeterWizard {
@@ -16,9 +19,11 @@ export class GreeterWizard {
   async onSceneEnter(
     @Ctx() ctx: Scenes.WizardContext,
   ): Promise<TelegrafListenerResult> {
-    console.log('Enter to scene');
     await ctx.wizard.next();
-    return 'Welcome to wizard scene ✋ Send me your name';
+    return {
+      text: 'Greeting wizard · Step 1 of 2\n\nSend me your name, or cancel to return to the examples.',
+      extra: createWizardKeyboard(),
+    };
   }
 
   @On('text')
@@ -27,10 +32,12 @@ export class GreeterWizard {
     @Ctx() ctx: Scenes.WizardContext,
     @Message() msg: { text: string },
   ): Promise<TelegrafListenerResult> {
-    console.log('Enter to step 1');
     ctx.wizard.state['name'] = msg.text;
     await ctx.wizard.next();
-    return 'Send me where are you from';
+    return {
+      text: 'Greeting wizard · Step 2 of 2\n\nSend me where are you from, or cancel to return to the examples.',
+      extra: createWizardKeyboard(),
+    };
   }
 
   @On('text')
@@ -40,8 +47,30 @@ export class GreeterWizard {
     ctx: Scenes.WizardContext & { wizard: { state: { name: string } } },
     @Message() msg: { text: string },
   ): Promise<TelegrafListenerResult> {
-    console.log('Enter to step 3');
+    const name = ctx.wizard.state.name;
     await ctx.scene.leave();
-    return `Hello ${ctx.wizard.state.name} from ${msg.text}. I'm Greater bot from 127.0.0.1 👋`;
+    return {
+      text: `Hello ${name} from ${msg.text}!\n\nGreeting complete. Choose another example:`,
+      extra: createGreeterMenu(),
+    };
+  }
+
+  @Action('wizard:cancel')
+  async onCancelAction(@Ctx() ctx: Scenes.WizardContext): Promise<void> {
+    await ctx.answerCbQuery('Wizard cancelled');
+    await ctx.scene.leave();
+    await ctx.editMessageText(
+      'Greeting wizard cancelled. Choose another example:',
+      createGreeterMenu(),
+    );
+  }
+
+  @Command('cancel')
+  async onCancelCommand(@Ctx() ctx: Scenes.WizardContext): Promise<void> {
+    await ctx.scene.leave();
+    await ctx.reply(
+      'Greeting wizard cancelled. Choose another example:',
+      createGreeterMenu(),
+    );
   }
 }

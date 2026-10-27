@@ -118,6 +118,9 @@ telegraf-hardened.
   В `/keyboard` нажмите `Acknowledge`, затем `Edit message`; новая клавиатура
   позволяет проверить декларативные `editMessage`, `editReplyMarkup` и
   `deleteMessage` listener results.
+  `/scene` открывает генератор числа с кнопками; `/wizard` пошагово собирает
+  имя и город. Wizard можно отменить кнопкой `Cancel` или командой `/cancel`;
+  после завершения или отмены доступно меню примеров.
   `/rich` отправляет rich message Bot API 10.3; кнопка `Update` редактирует
   исходное сообщение. Работа с настоящим Telegram проверяется вручную.
   `/ephemeral` отправляет временное сообщение, видимое только отправителю

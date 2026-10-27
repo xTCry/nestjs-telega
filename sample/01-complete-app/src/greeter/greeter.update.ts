@@ -17,6 +17,7 @@ import type { Types } from 'telegraf-hardened';
 import { HELLO_SCENE_ID, WIZARD_SCENE_ID } from '../app.constants';
 import { UpdateType } from '../common/decorators/update-type.decorator';
 import { Context } from '../interfaces/context.interface';
+import { createGreeterMenu } from './greeter-keyboard';
 
 @Update()
 export class GreeterUpdate {
@@ -38,9 +39,27 @@ export class GreeterUpdate {
     await ctx.scene.enter(HELLO_SCENE_ID);
   }
 
+  @Action('greeter:scene')
+  async onSceneAction(@Ctx() ctx: Context): Promise<void> {
+    await ctx.answerCbQuery();
+    await ctx.scene.enter(HELLO_SCENE_ID);
+  }
+
   @Command('wizard')
   async onWizardCommand(@Ctx() ctx: Context): Promise<TelegrafListenerResult> {
     await ctx.scene.enter(WIZARD_SCENE_ID);
+  }
+
+  @Action('greeter:wizard')
+  async onWizardAction(@Ctx() ctx: Context): Promise<void> {
+    await ctx.answerCbQuery();
+    await ctx.scene.enter(WIZARD_SCENE_ID);
+  }
+
+  @Action('greeter:features')
+  async onFeaturesAction(@Ctx() ctx: Context): Promise<void> {
+    await ctx.answerCbQuery();
+    await this.onFeatures(ctx);
   }
 
   @Command('features')
@@ -51,7 +70,8 @@ export class GreeterUpdate {
         '\n• rich messages: /rich\n• temporary messages: /ephemeral\n• reactions and business updates\n• Stars and gifts: /stars and /gifts\n\nUse /help for the full guide.',
       ]),
       Markup.inlineKeyboard([
-        Markup.button.switchToCurrentChat('Try inline mode', 'hello'),
+        [Markup.button.switchToCurrentChat('Try inline mode', 'hello')],
+        ...createGreeterMenu().reply_markup.inline_keyboard,
       ]),
     );
   }
