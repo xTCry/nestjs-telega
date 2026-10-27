@@ -22,11 +22,11 @@
   "dependencies": {
     "@nestjs/common": "^11.1.0",
     "@nestjs/core": "^11.1.0",
-    "nestjs-telega": "^0.1.0",
     "dotenv": "17.2.0",
+    "nestjs-telega": "^0.1.0",
     "reflect-metadata": "0.2.2",
     "rimraf": "6.1.2",
-    "telegraf-hardened": "^6.0.0"
+    "telegraf-hardened": "^6.1.0"
   },
   "devDependencies": {
     "@nestjs/cli": "11.0.0",
