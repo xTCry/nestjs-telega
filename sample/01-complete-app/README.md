@@ -135,3 +135,9 @@ telegraf-hardened.
   `business_message`. Реакция 👍 и `message_reaction_count` проверяют
   `@Reaction()` и актуальные reaction updates; для них bot должен быть
   администратором чата.
+
+## Автоматический тест polling
+
+После сборки библиотеки запустите `npm test --prefix sample/01-complete-app -- --runInBand`.
+`src/testing/polling.spec.ts` запускает Nest и polling через локальный fake Bot API
+без токена и сети Telegram. Подробнее: [Testing Telegram bots](../../docs/testing.md).

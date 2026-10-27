@@ -196,5 +196,6 @@ named bots, scenes, a wizard, middleware and bot injection.
 
 ## Documentation and support
 
+- [Testing Telegram bots](docs/testing.md)
 - [Documentation source](docs)
 - [Complete sample](sample/01-complete-app)

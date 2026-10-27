@@ -21,6 +21,7 @@ const englishSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Bot injection', link: '/extras/bot-injection' },
       { text: 'Middlewares', link: '/extras/middlewares' },
       { text: 'Multiple bots', link: '/extras/multiple-bots' },
+      { text: 'Testing', link: '/testing' },
       {
         text: 'Standalone applications',
         link: '/extras/standalone-applications',
@@ -50,6 +51,7 @@ const russianSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Внедрение bot instance', link: '/ru/extras/bot-injection' },
       { text: 'Middleware', link: '/ru/extras/middlewares' },
       { text: 'Несколько ботов', link: '/ru/extras/multiple-bots' },
+      { text: 'Тестирование', link: '/ru/testing' },
       {
         text: 'Standalone-приложения',
         link: '/ru/extras/standalone-applications',

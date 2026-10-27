@@ -29,5 +29,7 @@ description: Develop nestjs-telega or applications using it with telegraf-harden
   соответствующие тесты, sample и документацию согласно задаче.
 - В автоматических тестах библиотеки используй mocks или `launchOptions: false`,
   без реальных токенов и запуска бота. Mock-тест не подтверждает работу в Telegram.
+- Для polling-тестов используй `nestjs-telega/testing`: локальный `FakeTelegramApi`
+  и пример `sample/01-complete-app/src/testing/polling.spec.ts`.
 - В приложении следуй его соглашениям и предпочтениям пользователя по тестам;
   в sample библиотеки переиспользуй существующие Nest-модули и меню.
