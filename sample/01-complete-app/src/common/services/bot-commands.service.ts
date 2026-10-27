@@ -8,6 +8,7 @@ const defaultBotCommands = [
   { command: 'help', description: 'Show a short guide' },
   { command: 'admin', description: 'Open automatic reply controls' },
   { command: 'features', description: 'Show telegraf-hardened features' },
+  { command: 'rich', description: 'Send and edit a rich message' },
   { command: 'format', description: 'Send a formatted message' },
   { command: 'keyboard', description: 'Show an inline keyboard' },
   { command: 'menu', description: 'Show a reply keyboard' },

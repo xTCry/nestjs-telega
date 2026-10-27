@@ -110,7 +110,7 @@ telegraf-hardened.
 
 ### Команды для ручной проверки
 
-- Основной bot: `/format`, `/keyboard`, `/menu`, `/features`, `/scene`,
+- Основной bot: `/rich`, `/format`, `/keyboard`, `/menu`, `/features`, `/scene`,
   `/wizard`, `/admin`, inline query, `echo 😁🎉` и произвольное текстовое
   сообщение для fallback. Для inline query сначала включите режим через
   `/setinline` в BotFather, затем используйте `@bot_username запрос`: scrolling
@@ -118,6 +118,8 @@ telegraf-hardened.
   В `/keyboard` нажмите `Acknowledge`, затем `Edit message`; новая клавиатура
   позволяет проверить декларативные `editMessage`, `editReplyMarkup` и
   `deleteMessage` listener results.
+  `/rich` отправляет rich message Bot API 10.3; кнопка `Update` редактирует
+  исходное сообщение. Работа с настоящим Telegram проверяется вручную.
   `/admin` открывает цветные Bot API 9.4 inline-кнопки. При заданном
   `BUTTON_CUSTOM_EMOJI_ID` они также используют `icon_custom_emoji_id`.
   ID не универсален: получите подходящий через `/buttonemoji <custom emoji>`.
@@ -139,5 +141,8 @@ telegraf-hardened.
 ## Автоматический тест polling
 
 После сборки библиотеки запустите `npm test --prefix sample/01-complete-app -- --runInBand`.
-`src/testing/polling.spec.ts` запускает Nest и polling через локальный fake Bot API
-без токена и сети Telegram. Подробнее: [Testing Telegram bots](../../docs/testing.md).
+Тесты в `src/testing/` запускают Nest и polling через локальный fake Bot API
+без токена и сети Telegram. Они проверяют клавиатуру и callback, rich message,
+а также изоляцию wizard-сессий двух пользователей. Для rich message пример
+регистрирует собственный ответ fake через `onMethod`.
+Подробнее: [Testing Telegram bots](../../docs/testing.md).

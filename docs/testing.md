@@ -10,6 +10,9 @@ Start the fake, configure `options.telegram.apiRoot` to `api.url` and set
 `api.pushText(user, text)`, `api.pushCallback(user, data, message)`, or
 `api.pushUpdate(update)`. Use `api.waitForCall(method, predicate)` or
 `api.waitForNextCall(index, method, predicate)` to inspect calls and results.
+The sample also tests its actual keyboard callbacks and wizard sessions for two
+users. Its rich-message test shows how to supply a custom `sendRichMessage`
+response; the fake does not validate Telegram's rich-message rendering.
 
 Use `api.onMethod(method, handler)` to implement a missing method, and
 `api.failNext(method, error)` to simulate an API error. `api.reset()` clears

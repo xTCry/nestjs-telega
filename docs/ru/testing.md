@@ -9,6 +9,9 @@ fake Bot API для проверки Nest-обработчиков и насто
 `bot.launch()` и дождитесь `api.waitForPolling()`. Передавайте update через
 `pushText`, `pushCallback` или `pushUpdate`, а исходящие вызовы проверяйте
 через `waitForCall` или `waitForNextCall`.
+В sample также проверяются реальные callback-обработчики клавиатуры и отдельные
+wizard-сессии двух пользователей. Тест rich message показывает регистрацию
+ответа `sendRichMessage` через `onMethod`, но не проверяет отображение Telegram.
 
 `onMethod` добавляет обработчик метода; `failNext` имитирует ошибку API.
 `reset` очищает вызовы, очередь, сообщения и ошибки, сохраняя обработчики и

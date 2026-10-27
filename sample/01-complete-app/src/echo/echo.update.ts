@@ -71,7 +71,7 @@ export class EchoUpdate {
         '<b>What this sample demonstrates</b>',
         '• Send “echo &lt;text&gt;” for Unicode-safe text reversal; other text reaches the fallback handler.',
         '• /admin opens controls for automatic Business replies: text, stickers and reactions.',
-        '• /features, /format, /keyboard and /menu isolate individual telegraf-hardened APIs.',
+        '• /features, /rich, /format, /keyboard and /menu isolate individual telegraf-hardened APIs.',
         '• /exception verifies exception-filter access to the current listener class and handler.',
         '• Set BUSINESS_BOT_TOKEN to activate the second bot for Telegram Business updates and /dialogue.',
         'Use /admin to start with the interactive flow.',

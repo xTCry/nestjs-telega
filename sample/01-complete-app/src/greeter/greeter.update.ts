@@ -1,4 +1,5 @@
 import {
+  Action,
   Command,
   Ctx,
   Hears,
@@ -47,12 +48,32 @@ export class GreeterUpdate {
     await ctx.reply(
       Format.join([
         Format.bold('telegraf-hardened sample'),
-        '\n• reactions\n• business updates\n• Stars and gifts API via /stars and /gifts\n\nUse /help for the full guide.',
+        '\n• rich messages via /rich\n• reactions\n• business updates\n• Stars and gifts API via /stars and /gifts\n\nUse /help for the full guide.',
       ]),
       Markup.inlineKeyboard([
         Markup.button.switchToCurrentChat('Try inline mode', 'hello'),
       ]),
     );
+  }
+
+  @Command('rich')
+  async onRichMessage(@Ctx() ctx: Context): Promise<void> {
+    await ctx.replyWithRichMessage(
+      {
+        html: '<h1>Rich message</h1><p>Formatting with <b>Bot API 10.3</b>.</p>',
+      },
+      Markup.inlineKeyboard([Markup.button.callback('Update', 'rich:update')]),
+    );
+  }
+
+  @Action('rich:update')
+  async onRichUpdate(@Ctx() ctx: Context): Promise<void> {
+    await ctx.answerCbQuery();
+    await ctx.editMessageText(undefined, {
+      rich_message: {
+        html: '<h1>Updated</h1><p>The rich message was edited.</p>',
+      },
+    });
   }
 
   @Command('stars')
