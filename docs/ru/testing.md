@@ -11,7 +11,8 @@ fake Bot API для проверки Nest-обработчиков и насто
 через `waitForCall` или `waitForNextCall`.
 В sample также проверяются реальные callback-обработчики клавиатуры и отдельные
 wizard-сессии двух пользователей. Тест rich message показывает регистрацию
-ответа `sendRichMessage` через `onMethod`, но не проверяет отображение Telegram.
+ответа `sendRichMessage` через `onMethod`; тест ephemeral message проверяет ID
+сообщения и получателя. Доступность и отображение Telegram они не подтверждают.
 
 `onMethod` добавляет обработчик метода; `failNext` имитирует ошибку API.
 `reset` очищает вызовы, очередь, сообщения и ошибки, сохраняя обработчики и

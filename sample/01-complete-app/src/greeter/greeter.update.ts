@@ -48,7 +48,7 @@ export class GreeterUpdate {
     await ctx.reply(
       Format.join([
         Format.bold('telegraf-hardened sample'),
-        '\n• rich messages via /rich\n• reactions\n• business updates\n• Stars and gifts API via /stars and /gifts\n\nUse /help for the full guide.',
+        '\n• rich messages: /rich\n• temporary messages: /ephemeral\n• reactions and business updates\n• Stars and gifts: /stars and /gifts\n\nUse /help for the full guide.',
       ]),
       Markup.inlineKeyboard([
         Markup.button.switchToCurrentChat('Try inline mode', 'hello'),

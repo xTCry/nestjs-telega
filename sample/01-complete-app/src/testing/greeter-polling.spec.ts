@@ -8,6 +8,81 @@ import { GreeterModule } from '../greeter/greeter.module';
 import { sessionMiddleware } from '../middleware/session.middleware';
 
 describe('Greeter sample with local Telegram API', () => {
+  it('sends and manages an ephemeral message for its recipient', async () => {
+    const api = await FakeTelegramApi.start();
+    api.onMethod('sendMessage', (params) => ({
+      message_id: 0,
+      ephemeral_message_id: 77,
+      date: 0,
+      chat: { id: params.chat_id, type: 'private', first_name: 'Test' },
+      from: api.botInfo,
+      receiver_user: { id: 42, is_bot: false, first_name: 'Test' },
+      reply_markup: params.reply_markup,
+    }));
+    api.onMethod('editEphemeralMessageText', () => true);
+    api.onMethod('deleteEphemeralMessage', () => true);
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        GreeterModule,
+        TelegrafModule.forRoot({
+          token: '1:test-token',
+          launchOptions: false,
+          options: { telegram: { apiRoot: api.url } },
+          middlewaresBefore: [sessionMiddleware],
+          include: [GreeterModule],
+        }),
+      ],
+    }).compile();
+    try {
+      await moduleRef.init();
+      const bot = moduleRef.get<Telegraf>(getBotToken());
+      const polling = bot.launch();
+      try {
+        await api.waitForPolling();
+        api.pushText({ id: 42 }, '/ephemeral');
+        const sent = await api.waitForCall('sendMessage');
+        expect(sent.params).toMatchObject({
+          chat_id: 42,
+          ephemeral_message_parameters: { receiver_user_id: 42 },
+        });
+        const message = sent.result as FakeTelegramMessage;
+        api.pushCallback({ id: 42 }, 'ephemeral:update', message);
+        expect(
+          (await api.waitForCall('editEphemeralMessageText')).params,
+        ).toMatchObject({
+          chat_id: 42,
+          receiver_user_id: 42,
+          ephemeral_message_id: 77,
+        });
+        api.pushCallback({ id: 42 }, 'ephemeral:delete', message);
+        expect(
+          (await api.waitForCall('deleteEphemeralMessage')).params,
+        ).toMatchObject({
+          chat_id: 42,
+          receiver_user_id: 42,
+          ephemeral_message_id: 77,
+        });
+        api.pushCallback({ id: 43 }, 'ephemeral:delete', message);
+        expect(
+          (
+            await api.waitForCall('answerCallbackQuery', (call) =>
+              String(call.params.text).includes('no longer available'),
+            )
+          ).params.text,
+        ).toContain('no longer available');
+        expect(
+          api.calls.filter((call) => call.method === 'deleteEphemeralMessage'),
+        ).toHaveLength(1);
+      } finally {
+        bot.stop();
+        await polling;
+      }
+    } finally {
+      await moduleRef.close();
+      await api.close();
+    }
+  }, 15000);
+
   it('sends and edits a rich message using a callback', async () => {
     const api = await FakeTelegramApi.start();
     api.onMethod('sendRichMessage', (params) => ({

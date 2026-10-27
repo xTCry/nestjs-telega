@@ -110,7 +110,7 @@ telegraf-hardened.
 
 ### Команды для ручной проверки
 
-- Основной bot: `/rich`, `/format`, `/keyboard`, `/menu`, `/features`, `/scene`,
+- Основной bot: `/rich`, `/ephemeral`, `/format`, `/keyboard`, `/menu`, `/features`, `/scene`,
   `/wizard`, `/admin`, inline query, `echo 😁🎉` и произвольное текстовое
   сообщение для fallback. Для inline query сначала включите режим через
   `/setinline` в BotFather, затем используйте `@bot_username запрос`: scrolling
@@ -120,6 +120,9 @@ telegraf-hardened.
   `deleteMessage` listener results.
   `/rich` отправляет rich message Bot API 10.3; кнопка `Update` редактирует
   исходное сообщение. Работа с настоящим Telegram проверяется вручную.
+  `/ephemeral` отправляет временное сообщение, видимое только отправителю
+  команды; кнопки `Update` и `Delete` работают с его ephemeral ID. Проверка
+  на реальном Telegram и поддержка конкретного клиента пока не подтверждены.
   `/admin` открывает цветные Bot API 9.4 inline-кнопки. При заданном
   `BUTTON_CUSTOM_EMOJI_ID` они также используют `icon_custom_emoji_id`.
   ID не универсален: получите подходящий через `/buttonemoji <custom emoji>`.
@@ -143,6 +146,6 @@ telegraf-hardened.
 После сборки библиотеки запустите `npm test --prefix sample/01-complete-app -- --runInBand`.
 Тесты в `src/testing/` запускают Nest и polling через локальный fake Bot API
 без токена и сети Telegram. Они проверяют клавиатуру и callback, rich message,
-а также изоляцию wizard-сессий двух пользователей. Для rich message пример
-регистрирует собственный ответ fake через `onMethod`.
+а также изоляцию wizard-сессий двух пользователей. Для rich и ephemeral
+messages пример регистрирует ответы fake через `onMethod`.
 Подробнее: [Testing Telegram bots](../../docs/testing.md).
