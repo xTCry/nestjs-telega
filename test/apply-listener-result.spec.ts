@@ -59,6 +59,23 @@ describe('applyListenerResult', () => {
     });
   });
 
+  it('preserves an ephemeral reply target', async () => {
+    const reply = jest.fn().mockResolvedValue(undefined);
+
+    await applyListenerResult(
+      { reply, chat: { id: 1 } } as unknown as Context,
+      {
+        text: 'Hello',
+        extra: { reply_parameters: { ephemeral_message_id: 42 } },
+      },
+      {},
+    );
+
+    expect(reply).toHaveBeenCalledWith('Hello', {
+      reply_parameters: { ephemeral_message_id: 42 },
+    });
+  });
+
   it('answers a callback query only for a callback update', async () => {
     const answerCbQuery = jest.fn().mockResolvedValue(undefined);
 

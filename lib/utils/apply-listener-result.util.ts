@@ -228,15 +228,8 @@ function mergeReplyParameters(
     return undefined;
   }
 
-  const merged = { ...defaults, ...overrides };
-  if (typeof merged.message_id !== 'number') {
-    return undefined;
-  }
-
-  return {
-    ...merged,
-    message_id: merged.message_id,
-  };
+  const target = overrides ?? defaults;
+  return target ? { ...defaults, ...target } : undefined;
 }
 
 function isTelegrafListenerResponse(

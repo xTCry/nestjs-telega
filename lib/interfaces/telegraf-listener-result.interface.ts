@@ -33,8 +33,11 @@ export interface TelegrafInlineQueryResponse {
 /** Результат, который изменяет сообщение, связанное с текущим callback update-ом. */
 export interface TelegrafEditMessageResponse extends TelegrafCallbackUiResult {
   editMessage: {
-    text: Parameters<Context['editMessageText']>[0];
-    extra?: Parameters<Context['editMessageText']>[1];
+    text: Exclude<Parameters<Context['editMessageText']>[0], undefined>;
+    extra?: Omit<
+      NonNullable<Parameters<Context['editMessageText']>[1]>,
+      'rich_message'
+    >;
   };
 }
 
