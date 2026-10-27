@@ -9,6 +9,85 @@ import { FakeTelegramApi } from '../lib/testing';
 import { getBotToken } from '../lib/utils';
 
 describe('FakeTelegramApi', () => {
+  it('supports the schedule bot request formats and stateful keyboard lifecycle', async () => {
+    const api = await FakeTelegramApi.start({
+      botInfo: { id: 900001, username: 'schedule_bot' },
+      fallback: () => true,
+    });
+    const call = async (
+      method: string,
+      body: BodyInit,
+      headers?: HeadersInit,
+    ) => {
+      const response = await fetch(`${api.url}/bot1:test/${method}`, {
+        method: 'POST',
+        body,
+        headers,
+      });
+      return response.json() as Promise<{ ok: boolean; result: unknown }>;
+    };
+    try {
+      expect(
+        (await call('getMe', '{}', { 'content-type': 'application/json' }))
+          .result,
+      ).toMatchObject({ id: 900001, username: 'schedule_bot' });
+      const markup = {
+        inline_keyboard: [[{ text: 'Open', callback_data: 'open' }]],
+      };
+      const sent = await call(
+        'sendMessage',
+        new URLSearchParams({
+          chat_id: '42',
+          text: 'Menu',
+          reply_markup: JSON.stringify(markup),
+        }),
+      );
+      expect(sent.result).toMatchObject({
+        chat: { id: 42 },
+        reply_markup: markup,
+      });
+      const message = api.getMessageWithCallback('open');
+      expect(message).toBeDefined();
+      const form = new FormData();
+      form.set('chat_id', '42');
+      form.set('reply_markup', JSON.stringify(markup));
+      form.set('photo', new Blob(['file bytes']), 'photo.txt');
+      await call('sendPhoto', form);
+      expect((await api.waitForCall('sendPhoto')).params).toMatchObject({
+        chat_id: '42',
+        reply_markup: markup,
+      });
+      await call(
+        'deleteMessage',
+        JSON.stringify({ chat_id: 42, message_id: message!.message_id }),
+        { 'content-type': 'application/json' },
+      );
+      expect(api.getMessageWithCallback('open')).toBeUndefined();
+      expect(
+        (
+          await call('setMyCommands', JSON.stringify({ commands: [] }), {
+            'content-type': 'application/json',
+          })
+        ).result,
+      ).toBe(true);
+      api.reset();
+      api.pushText({ id: 42 }, 'Hello');
+      const next = await call(
+        'sendMessage',
+        JSON.stringify({ chat_id: 42, text: 'Again' }),
+        { 'content-type': 'application/json' },
+      );
+      expect(
+        (next.result as { message_id: number }).message_id,
+      ).toBeGreaterThan(message!.message_id);
+      expect(() =>
+        api.pushBotChatMembership({ id: 42 }, { id: 42, type: 'private' }),
+      ).toThrow();
+    } finally {
+      await api.close();
+    }
+  });
+
   it('keeps two polling bots and their fake APIs isolated', async () => {
     const first = await FakeTelegramApi.start();
     const second = await FakeTelegramApi.start();
@@ -28,6 +107,67 @@ describe('FakeTelegramApi', () => {
       bots.forEach((bot) => bot.stop());
       await Promise.all(launches);
       await Promise.all([first.close(), second.close()]);
+    }
+  }, 15000);
+
+  it('handles group updates, callback edits and edit failure fallback through polling', async () => {
+    const api = await FakeTelegramApi.start();
+    const bot = new Telegraf('1:test', { telegram: { apiRoot: api.url } });
+    bot.on('my_chat_member', (ctx) => ctx.reply('Welcome'));
+    bot.on('text', (ctx) =>
+      ctx.reply('Menu', {
+        reply_markup: {
+          inline_keyboard: [[{ text: 'Open', callback_data: 'open' }]],
+        },
+      }),
+    );
+    bot.action('open', async (ctx) => {
+      await ctx.answerCbQuery();
+      try {
+        await ctx.editMessageText('Updated', {
+          reply_markup: {
+            inline_keyboard: [[{ text: 'Next', callback_data: 'next' }]],
+          },
+        });
+      } catch {
+        await ctx.reply('Fallback');
+      }
+    });
+    const launch = bot.launch();
+    try {
+      await api.waitForPolling();
+      const chat = { id: -100, type: 'supergroup' as const, title: 'Group' };
+      const user = { id: 42 };
+      api.pushBotChatMembership(user, chat);
+      expect((await api.waitForCall('sendMessage')).result).toMatchObject({
+        chat,
+      });
+      const after = api.calls.length;
+      api.pushChatText(user, chat, '/start@test_bot');
+      const sent = await api.waitForNextCall(after, 'sendMessage');
+      const message = api.getMessageWithCallback('open');
+      expect(message?.chat).toMatchObject(chat);
+      expect(sent.result).toMatchObject({
+        reply_markup: { inline_keyboard: expect.any(Array) },
+      });
+      api.pushCallback(user, 'open', message!);
+      await api.waitForCall('editMessageText');
+      expect(api.getMessageWithCallback('next')?.message_id).toBe(
+        message!.message_id,
+      );
+      api.failNext('editMessageText', {
+        error_code: 400,
+        description: 'message unavailable',
+      });
+      const beforeFallback = api.calls.length;
+      api.pushCallback(user, 'open', message!);
+      expect(
+        (await api.waitForNextCall(beforeFallback, 'sendMessage')).params,
+      ).toMatchObject({ chat_id: chat.id, text: 'Fallback' });
+    } finally {
+      bot.stop();
+      await launch;
+      await api.close();
     }
   }, 15000);
 

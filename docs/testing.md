@@ -17,6 +17,11 @@ recorded calls, queued updates, messages and failures; registered methods and
 the running polling loop remain. Stop the bot, await its launch promise, close
 the Nest module, then close the fake in cleanup.
 
+`FakeTelegramApi.start({ botInfo, fallback })` accepts custom bot identity and
+an optional fallback for methods without built-in handlers. The default is to
+reject unsupported methods. Requests support JSON, URL-encoded fields and
+multipart text fields; uploaded file contents are not retained.
+
 For faster handler tests, disable auto-launch, set `bot.botInfo`, and pass a raw
 update directly to `await bot.handleUpdate(update)`. This bypasses polling and
 does not test the HTTP transport. Neither approach proves real Telegram API

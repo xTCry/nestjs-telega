@@ -8,6 +8,8 @@ import {
 } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
+import { readTelegramParams } from './read-telegram-params';
+
 /** Записанный запрос к локальному fake Bot API. */
 export interface FakeTelegramCall<
   TMethod extends string = string,
@@ -32,6 +34,24 @@ export interface FakeTelegramError {
   parameters?: Record<string, unknown>;
 }
 
+export type FakeTelegramApiParams = Record<string, unknown>;
+
+/** Опции fake: обработчик методов, для которых нет встроенного ответа. */
+export interface FakeTelegramApiOptions {
+  fallback?: (method: string, params: FakeTelegramApiParams) => unknown;
+  botInfo?: Partial<FakeTelegramBotInfo>;
+}
+
+export interface FakeTelegramBotInfo {
+  id: number;
+  is_bot: true;
+  first_name: string;
+  username: string;
+  can_join_groups: boolean;
+  can_read_all_group_messages: boolean;
+  supports_inline_queries: boolean;
+}
+
 export interface FakeTelegramUser {
   id: number;
   firstName?: string;
@@ -52,6 +72,8 @@ export interface FakeTelegramMessage {
   chat: FakeTelegramChat;
   from: { id: number; is_bot: boolean; first_name: string; username?: string };
   text?: string;
+  new_chat_title?: string;
+  entities?: { offset: number; length: number; type: 'bot_command' }[];
   reply_markup?: Record<string, unknown>;
 }
 
@@ -74,7 +96,8 @@ interface Waiter {
 /** Локальный ограниченный fake API для тестирования настоящего polling. */
 export class FakeTelegramApi {
   readonly calls: FakeTelegramCall[] = [];
-  readonly botInfo = {
+  readonly botInfo: FakeTelegramBotInfo;
+  private static readonly defaultBotInfo: FakeTelegramBotInfo = {
     id: 1,
     is_bot: true as const,
     first_name: 'Test bot',
@@ -96,14 +119,21 @@ export class FakeTelegramApi {
   private closed = false;
   url = '';
 
-  private constructor() {
+  private constructor(private readonly options: FakeTelegramApiOptions) {
+    this.botInfo = {
+      ...FakeTelegramApi.defaultBotInfo,
+      ...options.botInfo,
+      is_bot: true,
+    };
     this.server = createServer((request, response) => {
       void this.handleRequest(request, response);
     });
   }
 
-  static async start(): Promise<FakeTelegramApi> {
-    const api = new FakeTelegramApi();
+  static async start(
+    options: FakeTelegramApiOptions = {},
+  ): Promise<FakeTelegramApi> {
+    const api = new FakeTelegramApi(options);
     await new Promise<void>((resolve, reject) => {
       api.server.once('error', reject);
       api.server.listen(0, '127.0.0.1', () => {
@@ -130,7 +160,12 @@ export class FakeTelegramApi {
   pushText(user: FakeTelegramUser, text: string): FakeTelegramMessage {
     return this.pushMessage(
       user,
-      { id: user.id, type: 'private', first_name: user.firstName ?? 'Test' },
+      {
+        id: user.id,
+        type: 'private',
+        first_name: user.firstName ?? 'Test',
+        ...(user.username ? { username: user.username } : {}),
+      },
       text,
     );
   }
@@ -150,6 +185,8 @@ export class FakeTelegramApi {
     chat: FakeTelegramChat,
     title: string,
   ): void {
+    if (chat.type === 'private')
+      throw new Error('pushChatTitleUpdate expects group or supergroup chat');
     const updatedChat = { ...chat, title };
     this.chats.set(chat.id, updatedChat);
     const message = {
@@ -163,6 +200,8 @@ export class FakeTelegramApi {
   }
 
   pushBotChatMembership(user: FakeTelegramUser, chat: FakeTelegramChat): void {
+    if (chat.type === 'private')
+      throw new Error('pushBotChatMembership expects group or supergroup chat');
     this.chats.set(chat.id, chat);
     this.pushUpdate({
       update_id: this.nextUpdateId,
@@ -298,7 +337,16 @@ export class FakeTelegramApi {
         reject,
         timer: setTimeout(() => {
           this.waiters.delete(waiter);
-          reject(new Error(`Timed out waiting for Telegram ${method}`));
+          reject(
+            new Error(
+              `Timed out waiting for Telegram ${method}; methods: ${this.calls
+                .slice(after)
+                .map((call) => call.method)
+                .join(
+                  ', ',
+                )}; queued: ${this.updates.map((update) => update.update_id).join(', ')}; pending polls: ${this.polls.size}`,
+            ),
+          );
         }, timeoutMs),
       };
       this.waiters.add(waiter);
@@ -312,7 +360,6 @@ export class FakeTelegramApi {
     this.failures.clear();
     this.messages.clear();
     this.chats.clear();
-    this.nextMessageId = 1;
   }
 
   async close(): Promise<void> {
@@ -359,9 +406,7 @@ export class FakeTelegramApi {
       return;
     }
     try {
-      let body = '';
-      for await (const chunk of request) body += String(chunk);
-      const params = body ? (JSON.parse(body) as Record<string, unknown>) : {};
+      const params = await readTelegramParams(request);
       const failure = this.failures.get(method)?.shift();
       if (failure) {
         this.record({ method, params, result: failure });
@@ -448,10 +493,19 @@ export class FakeTelegramApi {
         'deleteWebhook',
         'setWebhook',
         'answerCallbackQuery',
-        'deleteMessage',
+        'setMyCommands',
+        'setMyDescription',
+        'setChatMenuButton',
       ].includes(method)
     )
       return true;
+    if (method === 'deleteMessage') {
+      this.messages.delete(
+        `${String(params.chat_id)}:${String(params.message_id)}`,
+      );
+      return true;
+    }
+    if (this.options.fallback) return this.options.fallback(method, params);
     throw new Error(`Unsupported fake Telegram method: ${method}`);
   }
 
